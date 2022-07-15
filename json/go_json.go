@@ -1,10 +1,10 @@
-//go:build !jsoniter && !go_json
-// +build !jsoniter,!go_json
+//go:build go_json
+// +build go_json
 
 package json
 
 import (
-	"encoding/json"
+	json "github.com/goccy/go-json"
 )
 
 var (
