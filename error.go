@@ -2,6 +2,7 @@ package echotool
 
 import (
 	"fmt"
+	"sync"
 )
 
 type Kind int
@@ -68,4 +69,59 @@ func NewFormEmptyError(key string) *EmptyError {
 
 func (e EmptyError) Error() string {
 	return fmt.Sprintf("%s(%s) is empty", e.key, e.kind.String())
+}
+
+func IsEmptyError(err error) bool {
+	_, ok := err.(*EmptyError)
+	return ok
+}
+
+type EchotoolError struct {
+	code int
+	err  error
+}
+
+var _ error = (*EchotoolError)(nil)
+
+func (e EchotoolError) GetCode() int {
+	return e.code
+}
+
+func (e EchotoolError) GetError() error {
+	return e.err
+}
+
+func (e EchotoolError) Error() string {
+	return fmt.Sprintf("%s - %+v", CodeMsg(e.code), e.err)
+}
+
+func (e *EchotoolError) reset() {
+	e.code = 0
+	e.err = nil
+}
+
+var echotoolErrorPool sync.Pool
+
+func AcquireEchotoolError(code int, err error) (e *EchotoolError) {
+	if v := echotoolErrorPool.Get(); v != nil {
+		e = v.(*EchotoolError)
+	} else {
+		e = &EchotoolError{}
+	}
+
+	e.code = code
+	e.err = err
+	return
+}
+
+func ReleaseEchotoolError(e *EchotoolError) {
+	if e != nil {
+		e.reset()
+		echotoolErrorPool.Put(e)
+	}
+}
+
+func IsEchotoolError(err error) bool {
+	_, ok := err.(*EchotoolError)
+	return ok
 }

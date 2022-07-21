@@ -3,6 +3,7 @@ module github.com/songzhaoliang/echotool
 go 1.18
 
 require (
+	github.com/goccy/go-json v0.9.8
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-querystring v1.1.0
 	github.com/json-iterator/go v1.1.12
@@ -18,8 +19,8 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/goccy/go-json v0.9.8 // indirect
-	github.com/google/uuid v1.1.1 // indirect
+	github.com/google/go-cmp v0.5.7 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f // indirect
@@ -32,8 +33,9 @@ require (
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
-	golang.org/x/sys v0.0.0-20211103235746-7861aae1554b // indirect
+	golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32 // indirect
 	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect

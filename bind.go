@@ -12,9 +12,21 @@ func BindHeader(c echo.Context, v interface{}) error {
 	return binder.HeaderBinder.Bind(c, v)
 }
 
+func MustBindHeader(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, BindHeader(c, v)
+	}, CodeBindErr, cbs...)
+}
+
 // BindParam needs tag "param" in fields of v.
 func BindParam(c echo.Context, v interface{}) error {
 	return binder.ParamBinder.Bind(c, v)
+}
+
+func MustBindParam(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, BindParam(c, v)
+	}, CodeBindErr, cbs...)
 }
 
 // FormBindQuery needs tag "form" in fields of v.
@@ -22,9 +34,21 @@ func FormBindQuery(c echo.Context, v interface{}) error {
 	return binder.QueryBinder.Bind(c, v)
 }
 
+func MustFormBindQuery(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, FormBindQuery(c, v)
+	}, CodeBindErr, cbs...)
+}
+
 // FormBindBody needs tag "form" in fields of v.
 func FormBindBody(c echo.Context, v interface{}) error {
 	return binder.FormPostBinder.Bind(c, v)
+}
+
+func MustFormBindBody(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, FormBindBody(c, v)
+	}, CodeBindErr, cbs...)
 }
 
 // FormBindQueryBody needs tag "form" in fields of v.
@@ -32,9 +56,21 @@ func FormBindQueryBody(c echo.Context, v interface{}) error {
 	return binder.FormBinder.Bind(c, v)
 }
 
+func MustFormBindQueryBody(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, FormBindQueryBody(c, v)
+	}, CodeBindErr, cbs...)
+}
+
 // JSONBindBody needs tag "json" in fields of v.
 func JSONBindBody(c echo.Context, v interface{}) error {
 	return binder.JSONBodyBinder.Bind(c, v)
+}
+
+func MustJSONBindBody(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, JSONBindBody(c, v)
+	}, CodeBindErr, cbs...)
 }
 
 // XMLBindBody needs tag "xml" in fields of v.
@@ -42,9 +78,21 @@ func XMLBindBody(c echo.Context, v interface{}) error {
 	return binder.XMLBodyBinder.Bind(c, v)
 }
 
+func MustXMLBindBody(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, XMLBindBody(c, v)
+	}, CodeBindErr, cbs...)
+}
+
 // ProtobufBindBody needs tag "protobuf" in fields of v.
 func ProtobufBindBody(c echo.Context, v interface{}) error {
 	return binder.ProtobufBodyBinder.Bind(c, v)
+}
+
+func MustProtobufBindBody(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, ProtobufBindBody(c, v)
+	}, CodeBindErr, cbs...)
 }
 
 // MsgpackBindBody needs tag "msgpack" in fields of v.
@@ -52,14 +100,32 @@ func MsgpackBindBody(c echo.Context, v interface{}) error {
 	return binder.MsgpackBodyBinder.Bind(c, v)
 }
 
+func MustMsgpackBindBody(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, MsgpackBindBody(c, v)
+	}, CodeBindErr, cbs...)
+}
+
 // YAMLBindBody needs tag "yaml" in fields of v.
 func YAMLBindBody(c echo.Context, v interface{}) error {
 	return binder.YAMLBodyBinder.Bind(c, v)
 }
 
+func MustYAMLBindBody(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, YAMLBindBody(c, v)
+	}, CodeBindErr, cbs...)
+}
+
 // Validate needs tag "valid" in fields of v.
 func Validate(v interface{}) error {
 	return validator.EchotoolValidator.ValidateStruct(v)
+}
+
+func MustValidate(v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, Validate(v)
+	}, CodeValidateErr, cbs...)
 }
 
 const (
@@ -107,7 +173,7 @@ func Bind(c echo.Context, v interface{}, flag int) (err error) {
 	// this must be the last one.
 	if flag&BValidator != 0 {
 		if err = Validate(v); err != nil {
-			return
+			return AcquireEchotoolError(CodeValidateErr, err)
 		}
 	}
 
@@ -117,6 +183,12 @@ func Bind(c echo.Context, v interface{}, flag int) (err error) {
 		}
 	}
 	return
+}
+
+func MustBind(c echo.Context, v interface{}, flag int, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, Bind(c, v, flag)
+	}, CodeBindErr, cbs...)
 }
 
 type proxy struct {
@@ -189,4 +261,10 @@ func (p *proxy) Validate() *proxy {
 
 func (p *proxy) End() error {
 	return Bind(p.c, p.v, p.flag)
+}
+
+func (p *proxy) MustEnd(cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, p.End()
+	}, CodeBindErr, cbs...)
 }

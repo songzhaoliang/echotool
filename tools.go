@@ -2,6 +2,7 @@ package echotool
 
 import (
 	"bytes"
+	"net/http"
 	"net/url"
 	"strconv"
 
@@ -11,12 +12,22 @@ import (
 	"github.com/songzhaoliang/echotool/json"
 )
 
+type RunFunc func() (interface{}, error)
+type CallbackFunc func(error)
+
 func HeaderBool(c echo.Context, key string) (bool, error) {
 	if v := c.Request().Header.Get(key); handy.IsEmptyStr(v) {
 		return false, NewHeaderEmptyError(key)
 	} else {
 		return strconv.ParseBool(v)
 	}
+}
+
+func MustHeaderBool(c echo.Context, key string, cbs ...CallbackFunc) bool {
+	result := MustDoCallback(func() (interface{}, error) {
+		return HeaderBool(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(bool)
 }
 
 func HeaderInt64(c echo.Context, key string) (int64, error) {
@@ -27,12 +38,26 @@ func HeaderInt64(c echo.Context, key string) (int64, error) {
 	}
 }
 
+func MustHeaderInt64(c echo.Context, key string, cbs ...CallbackFunc) int64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return HeaderInt64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(int64)
+}
+
 func HeaderUint64(c echo.Context, key string) (uint64, error) {
 	if v := c.Request().Header.Get(key); handy.IsEmptyStr(v) {
 		return 0, NewHeaderEmptyError(key)
 	} else {
 		return strconv.ParseUint(v, 10, 64)
 	}
+}
+
+func MustHeaderUInt64(c echo.Context, key string, cbs ...CallbackFunc) uint64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return HeaderUint64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(uint64)
 }
 
 func HeaderString(c echo.Context, key string) (string, error) {
@@ -43,12 +68,26 @@ func HeaderString(c echo.Context, key string) (string, error) {
 	}
 }
 
+func MustHeaderString(c echo.Context, key string, cbs ...CallbackFunc) string {
+	result := MustDoCallback(func() (interface{}, error) {
+		return HeaderString(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(string)
+}
+
 func ParamBool(c echo.Context, key string) (bool, error) {
 	if v := c.Param(key); handy.IsEmptyStr(v) {
 		return false, NewParamEmptyError(key)
 	} else {
 		return strconv.ParseBool(v)
 	}
+}
+
+func MustParamBool(c echo.Context, key string, cbs ...CallbackFunc) bool {
+	result := MustDoCallback(func() (interface{}, error) {
+		return ParamBool(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(bool)
 }
 
 func ParamInt64(c echo.Context, key string) (int64, error) {
@@ -59,12 +98,26 @@ func ParamInt64(c echo.Context, key string) (int64, error) {
 	}
 }
 
+func MustParamInt64(c echo.Context, key string, cbs ...CallbackFunc) int64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return ParamInt64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(int64)
+}
+
 func ParamUint64(c echo.Context, key string) (uint64, error) {
 	if v := c.Param(key); handy.IsEmptyStr(v) {
 		return 0, NewParamEmptyError(key)
 	} else {
 		return strconv.ParseUint(v, 10, 64)
 	}
+}
+
+func MustParamUInt64(c echo.Context, key string, cbs ...CallbackFunc) uint64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return ParamUint64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(uint64)
 }
 
 func ParamString(c echo.Context, key string) (string, error) {
@@ -75,12 +128,26 @@ func ParamString(c echo.Context, key string) (string, error) {
 	}
 }
 
+func MustParamString(c echo.Context, key string, cbs ...CallbackFunc) string {
+	result := MustDoCallback(func() (interface{}, error) {
+		return ParamString(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(string)
+}
+
 func QueryBool(c echo.Context, key string) (bool, error) {
 	if v := c.QueryParam(key); handy.IsEmptyStr(v) {
 		return false, NewQueryEmptyError(key)
 	} else {
 		return strconv.ParseBool(v)
 	}
+}
+
+func MustQueryBool(c echo.Context, key string, cbs ...CallbackFunc) bool {
+	result := MustDoCallback(func() (interface{}, error) {
+		return QueryBool(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(bool)
 }
 
 func QueryInt64(c echo.Context, key string) (int64, error) {
@@ -91,12 +158,26 @@ func QueryInt64(c echo.Context, key string) (int64, error) {
 	}
 }
 
+func MustQueryInt64(c echo.Context, key string, cbs ...CallbackFunc) int64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return QueryInt64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(int64)
+}
+
 func QueryUint64(c echo.Context, key string) (uint64, error) {
 	if v := c.QueryParam(key); handy.IsEmptyStr(v) {
 		return 0, NewQueryEmptyError(key)
 	} else {
 		return strconv.ParseUint(v, 10, 64)
 	}
+}
+
+func MustQueryUInt64(c echo.Context, key string, cbs ...CallbackFunc) uint64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return QueryUint64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(uint64)
 }
 
 func QueryString(c echo.Context, key string) (string, error) {
@@ -107,12 +188,26 @@ func QueryString(c echo.Context, key string) (string, error) {
 	}
 }
 
+func MustQueryString(c echo.Context, key string, cbs ...CallbackFunc) string {
+	result := MustDoCallback(func() (interface{}, error) {
+		return QueryString(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(string)
+}
+
 func PostFormBool(c echo.Context, key string) (bool, error) {
 	if v := c.Request().PostFormValue(key); handy.IsEmptyStr(v) {
 		return false, NewPostFormEmptyError(key)
 	} else {
 		return strconv.ParseBool(v)
 	}
+}
+
+func MustPostFormBool(c echo.Context, key string, cbs ...CallbackFunc) bool {
+	result := MustDoCallback(func() (interface{}, error) {
+		return PostFormBool(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(bool)
 }
 
 func PostFormInt64(c echo.Context, key string) (int64, error) {
@@ -123,12 +218,26 @@ func PostFormInt64(c echo.Context, key string) (int64, error) {
 	}
 }
 
+func MustPostFormInt64(c echo.Context, key string, cbs ...CallbackFunc) int64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return PostFormInt64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(int64)
+}
+
 func PostFormUint64(c echo.Context, key string) (uint64, error) {
 	if v := c.Request().PostFormValue(key); handy.IsEmptyStr(v) {
 		return 0, NewPostFormEmptyError(key)
 	} else {
 		return strconv.ParseUint(v, 10, 64)
 	}
+}
+
+func MustPostFormUInt64(c echo.Context, key string, cbs ...CallbackFunc) uint64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return PostFormUint64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(uint64)
 }
 
 func PostFormString(c echo.Context, key string) (string, error) {
@@ -139,12 +248,26 @@ func PostFormString(c echo.Context, key string) (string, error) {
 	}
 }
 
+func MustPostFormString(c echo.Context, key string, cbs ...CallbackFunc) string {
+	result := MustDoCallback(func() (interface{}, error) {
+		return PostFormString(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(string)
+}
+
 func FormBool(c echo.Context, key string) (bool, error) {
 	if v := c.FormValue(key); handy.IsEmptyStr(v) {
 		return false, NewFormEmptyError(key)
 	} else {
 		return strconv.ParseBool(v)
 	}
+}
+
+func MustFormBool(c echo.Context, key string, cbs ...CallbackFunc) bool {
+	result := MustDoCallback(func() (interface{}, error) {
+		return FormBool(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(bool)
 }
 
 func FormInt64(c echo.Context, key string) (int64, error) {
@@ -155,12 +278,26 @@ func FormInt64(c echo.Context, key string) (int64, error) {
 	}
 }
 
+func MustFormInt64(c echo.Context, key string, cbs ...CallbackFunc) int64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return FormInt64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(int64)
+}
+
 func FormUint64(c echo.Context, key string) (uint64, error) {
 	if v := c.FormValue(key); handy.IsEmptyStr(v) {
 		return 0, NewFormEmptyError(key)
 	} else {
 		return strconv.ParseUint(v, 10, 64)
 	}
+}
+
+func MustFormUint64(c echo.Context, key string, cbs ...CallbackFunc) uint64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return FormUint64(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(uint64)
 }
 
 func FormString(c echo.Context, key string) (string, error) {
@@ -171,9 +308,23 @@ func FormString(c echo.Context, key string) (string, error) {
 	}
 }
 
+func MustFormString(c echo.Context, key string, cbs ...CallbackFunc) string {
+	result := MustDoCallback(func() (interface{}, error) {
+		return FormString(c, key)
+	}, CodeBadRequest, cbs...)
+	return result.(string)
+}
+
 // EncodeValues needs tag "url" in fields of v.
 func EncodeValues(v interface{}) (url.Values, error) {
 	return query.Values(v)
+}
+
+func MustEncodeValues(v interface{}, cbs ...CallbackFunc) url.Values {
+	result := MustDoCallback(func() (interface{}, error) {
+		return EncodeValues(v)
+	}, CodeEncodeErr, cbs...)
+	return result.(url.Values)
 }
 
 // EncodeJSON needs tag "json" in fields of v.
@@ -185,4 +336,55 @@ func EncodeJSON(v interface{}) (*bytes.Buffer, error) {
 		return nil, err
 	}
 	return buffer, nil
+}
+
+// MustEncodeJSON needs tag "json" in fields of v.
+// Note: ReleaseBuffer needs to be called after MustEncodeJSON is called successfully.
+func MustEncodeJSON(v interface{}, cbs ...CallbackFunc) *bytes.Buffer {
+	result := MustDoCallback(func() (interface{}, error) {
+		return EncodeJSON(v)
+	}, CodeEncodeErr, cbs...)
+	return result.(*bytes.Buffer)
+}
+
+func MustDo(run RunFunc, codes ...int) interface{} {
+	code := CodeDownstreamErr
+	if len(codes) > 0 {
+		code = codes[0]
+	}
+
+	return MustDoCallback(run, code)
+}
+
+// MustDoCallback will call cbs if and only if run has error.
+func MustDoCallback(run RunFunc, code int, cbs ...CallbackFunc) interface{} {
+	if run == nil {
+		return nil
+	}
+
+	result, err := run()
+	if err == nil {
+		return result
+	}
+
+	for _, cb := range cbs {
+		cb(err)
+	}
+
+	if !IsEchotoolError(err) {
+		err = AcquireEchotoolError(code, err)
+	}
+	panic(err)
+}
+
+func GetRequestHost(req *http.Request) (host string) {
+	if host = req.Host; handy.IsEmptyStr(host) {
+		host = req.URL.Host
+	}
+	return
+}
+
+func GetUUID(c echo.Context) string {
+	u, _ := handy.GetUUID()
+	return u
 }
