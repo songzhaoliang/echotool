@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 
 	"github.com/google/go-querystring/query"
@@ -384,7 +385,12 @@ func GetRequestHost(req *http.Request) (host string) {
 	return
 }
 
-func GetUUID(c echo.Context) string {
-	u, _ := handy.GetUUID()
-	return u
+func GetUUID(c echo.Context) (u string) {
+	u, _ = handy.GetUUID()
+	return
+}
+
+func GetHostname() (host string) {
+	host, _ = os.Hostname()
+	return
 }

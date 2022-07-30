@@ -14,6 +14,9 @@ type Context struct {
 	code int
 	data interface{}
 	err  error
+
+	namedValue   string
+	customValues map[string]string
 }
 
 var _ fmt.Stringer = (*Context)(nil)
@@ -53,6 +56,27 @@ func (ec *Context) GetError() error {
 	return ec.err
 }
 
+func (ec *Context) GetNamedValue() string {
+	return ec.namedValue
+}
+
+func (ec *Context) SetNamedValue(value string) {
+	ec.namedValue = value
+}
+
+func (ec *Context) GetCustomValue(key string) (value string, exists bool) {
+	value, exists = ec.customValues[key]
+	return
+}
+
+func (ec *Context) SetCustomValue(key, value string) {
+	ec.customValues[key] = value
+}
+
+func (ec *Context) GetCustomValues() map[string]string {
+	return ec.customValues
+}
+
 func (ec *Context) reset() {
 	ec.engine = nil
 	ec.handlers = ec.handlers[:0]
@@ -60,4 +84,6 @@ func (ec *Context) reset() {
 	ec.code = 0
 	ec.data = nil
 	ec.err = nil
+	ec.namedValue = ""
+	ec.customValues = nil
 }

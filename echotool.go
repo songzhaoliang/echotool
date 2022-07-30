@@ -99,6 +99,7 @@ func (e *Engine) acquireContext() (ec *Context) {
 
 	ec.engine = e
 	ec.ok = true
+	ec.customValues = make(map[string]string)
 	return
 }
 

@@ -13,7 +13,7 @@ func SetRequestID(f func(c echo.Context) string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			id, _ := HeaderString(c, KeyRequestID)
-			if handy.IsEmptyStr(id) {
+			if handy.IsEmptyStr(id) && f != nil {
 				id = f(c)
 			}
 
@@ -32,4 +32,22 @@ func GetRequestID(c echo.Context) string {
 		}
 	}
 	return handy.StrEmpty
+}
+
+// AddTraceID adds trace id to log for troubleshooting problems and so on.
+func AddTraceID(f func(c echo.Context) string) HandlerFunc {
+	return func(c echo.Context, ec *Context) {
+		if f != nil {
+			ec.SetNamedValue(f(c))
+		}
+	}
+}
+
+// AddNotice adds kv pair to log for troubleshooting problems and so on.
+func AddNotice(key, value string) HandlerFunc {
+	return func(c echo.Context, ec *Context) {
+		if key != handy.StrEmpty || value != handy.StrEmpty {
+			ec.SetCustomValue(key, value)
+		}
+	}
 }
