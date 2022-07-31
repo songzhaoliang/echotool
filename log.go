@@ -1,9 +1,11 @@
 package echotool
 
 import (
+	"io"
 	"time"
 
 	"github.com/popeyeio/handy"
+	"github.com/songzhaoliang/echotool/json"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -25,8 +27,8 @@ func NewDefaultLogger() *zap.SugaredLogger {
 			EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 				enc.AppendString(t.Format("2006-01-02 15:04:05"))
 			},
-			EncodeDuration: zapcore.StringDurationEncoder,
-			// EncodeCaller:   zapcore.ShortCallerEncoder,
+			EncodeDuration:      zapcore.StringDurationEncoder,
+			NewReflectedEncoder: FasterJSONReflectedEncoder,
 		},
 		OutputPaths:      []string{"stdout"},
 		ErrorOutputPaths: []string{"stdout"},
@@ -73,6 +75,32 @@ func CtxPanic(ec *Context, format string, args ...interface{}) {
 	buildLogger(ec).Panicf(format, args...)
 }
 
+func CtxDebugKV(ec *Context, msg string, fields ...zap.Field) {
+	buildLogger(ec).Desugar().Debug(msg, fields...)
+}
+
+func CtxInfoKV(ec *Context, msg string, fields ...zap.Field) {
+	buildLogger(ec).Desugar().Info(msg, fields...)
+}
+
+func CtxWarnKV(ec *Context, msg string, fields ...zap.Field) {
+	buildLogger(ec).Desugar().Warn(msg, fields...)
+}
+
+func CtxErrorKV(ec *Context, msg string, fields ...zap.Field) {
+	buildLogger(ec).Desugar().Error(msg, fields...)
+}
+
+// CtxFatalKV logs a message, then calls os.Exit.
+func CtxFatalKV(ec *Context, msg string, fields ...zap.Field) {
+	buildLogger(ec).Desugar().Fatal(msg, fields...)
+}
+
+// CtxPanicKV logs a message, then panics.
+func CtxPanicKV(ec *Context, msg string, fields ...zap.Field) {
+	buildLogger(ec).Desugar().Panic(msg, fields...)
+}
+
 func buildLogger(ec *Context) (l *zap.SugaredLogger) {
 	l = logger
 	if ec == nil {
@@ -113,4 +141,36 @@ func Fatal(format string, args ...interface{}) {
 // Panic logs a message, then panics.
 func Panic(format string, args ...interface{}) {
 	logger.Panicf(format, args...)
+}
+
+func DebugKV(msg string, fields ...zap.Field) {
+	logger.Desugar().Debug(msg, fields...)
+}
+
+func InfoKV(msg string, fields ...zap.Field) {
+	logger.Desugar().Info(msg, fields...)
+}
+
+func WarnKV(msg string, fields ...zap.Field) {
+	logger.Desugar().Warn(msg, fields...)
+}
+
+func ErrorKV(msg string, fields ...zap.Field) {
+	logger.Desugar().Error(msg, fields...)
+}
+
+// FatalKV logs a message, then calls os.Exit.
+func FatalKV(msg string, fields ...zap.Field) {
+	logger.Desugar().Fatal(msg, fields...)
+}
+
+// PanicKV logs a message, then panics.
+func PanicKV(msg string, fields ...zap.Field) {
+	logger.Desugar().Panic(msg, fields...)
+}
+
+func FasterJSONReflectedEncoder(w io.Writer) zapcore.ReflectedEncoder {
+	enc := json.NewEncoder(w)
+	enc.SetEscapeHTML(false)
+	return enc
 }

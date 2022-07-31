@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/labstack/echo"
 	"github.com/songzhaoliang/echotool"
+	"go.uber.org/zap"
 )
 
 type User struct {
@@ -30,6 +31,7 @@ func CreateUser(c echo.Context, ec *echotool.Context) {
 	echotool.New(c, user).JSONBindBody().MustEnd()
 
 	echotool.CtxInfo(ec, "user is %+v", user)
+	echotool.CtxInfoKV(ec, "user takes part in an examination", zap.Int("score", 98))
 
 	ec.Finish(echotool.CodeOKZero, nil)
 }
