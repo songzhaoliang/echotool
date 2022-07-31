@@ -75,6 +75,10 @@ func CtxPanic(ec *Context, format string, args ...interface{}) {
 
 func buildLogger(ec *Context) (l *zap.SugaredLogger) {
 	l = logger
+	if ec == nil {
+		return
+	}
+
 	if v := ec.GetNamedValue(); !handy.IsEmptyStr(v) {
 		l = l.Named(v)
 	}
@@ -83,4 +87,30 @@ func buildLogger(ec *Context) (l *zap.SugaredLogger) {
 		l = l.With(zap.String(k, v))
 	}
 	return
+}
+
+func Debug(format string, args ...interface{}) {
+	logger.Debugf(format, args...)
+}
+
+func Info(format string, args ...interface{}) {
+	logger.Infof(format, args...)
+}
+
+func Warn(format string, args ...interface{}) {
+	logger.Warnf(format, args...)
+}
+
+func Error(format string, args ...interface{}) {
+	logger.Errorf(format, args...)
+}
+
+// Fatal logs a message, then calls os.Exit.
+func Fatal(format string, args ...interface{}) {
+	logger.Fatalf(format, args...)
+}
+
+// Panic logs a message, then panics.
+func Panic(format string, args ...interface{}) {
+	logger.Panicf(format, args...)
 }
