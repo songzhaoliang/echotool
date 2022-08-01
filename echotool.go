@@ -4,6 +4,8 @@ import (
 	"sync"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
+	"github.com/songzhaoliang/echotool/pprof"
 )
 
 type HandlerFunc func(echo.Context, *Context)
@@ -44,6 +46,20 @@ func NewEngine(opts ...Option) *Engine {
 		opt(e)
 	}
 
+	return e
+}
+
+func NewDefaultEcho() *echo.Echo {
+	r := echo.New()
+	r.Use(middleware.Recover())
+	r.Use(SetRequestID(GetUUID))
+	pprof.Register(r)
+	return r
+}
+
+func NewDefaultEngine(opts ...Option) *Engine {
+	e := NewEngine(opts...)
+	e.Use(AddTraceID(GetRequestID))
 	return e
 }
 
