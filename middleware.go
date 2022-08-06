@@ -46,7 +46,7 @@ func AddTraceID(f func(c echo.Context) string) HandlerFunc {
 // AddNotice adds kv pair to log for troubleshooting problems and so on.
 func AddNotice(key, value string) HandlerFunc {
 	return func(c echo.Context, ec *Context) {
-		if key != handy.StrEmpty || value != handy.StrEmpty {
+		if !handy.IsEmptyStr(key) || !handy.IsEmptyStr(value) {
 			ec.SetCustomValue(key, value)
 		}
 	}

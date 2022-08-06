@@ -2,8 +2,10 @@ package echotool
 
 import (
 	"io"
+	"os"
 	"time"
 
+	rl "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/popeyeio/handy"
 	"github.com/songzhaoliang/echotool/json"
 	"go.uber.org/zap"
@@ -14,28 +16,133 @@ var logger = NewDefaultLogger()
 
 func NewDefaultLogger() *zap.SugaredLogger {
 	cfg := zap.Config{
-		Level:    zap.NewAtomicLevelAt(zap.DebugLevel),
-		Encoding: "console",
-		EncoderConfig: zapcore.EncoderConfig{
-			TimeKey:     "T",
-			LevelKey:    "L",
-			NameKey:     "N",
-			CallerKey:   "C",
-			MessageKey:  "M",
-			LineEnding:  zapcore.DefaultLineEnding,
-			EncodeLevel: zapcore.CapitalLevelEncoder,
-			EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-				enc.AppendString(t.Format("2006-01-02 15:04:05"))
-			},
-			EncodeDuration:      zapcore.StringDurationEncoder,
-			NewReflectedEncoder: FasterJSONReflectedEncoder,
-		},
+		Level:            zap.NewAtomicLevelAt(zap.DebugLevel),
+		Encoding:         "console",
+		EncoderConfig:    NewDefaultEncodeConfig(),
 		OutputPaths:      []string{"stdout"},
 		ErrorOutputPaths: []string{"stdout"},
 	}
 
 	l, _ := cfg.Build()
 	return l.Sugar()
+}
+
+// RotateConfig is the config for rotating logs.
+// The format of suffix refers to https://github.com/lestrrat-go/strftime.
+type RotateConfig struct {
+	EncoderConfig zapcore.EncoderConfig
+	Paths         []string
+	Suffix        string
+	Level         zapcore.Level
+	RotateTime    time.Duration
+	TTL           time.Duration
+}
+
+type RotateConfigOption func(*RotateConfig)
+
+func WithEncoderConfig(cfg zapcore.EncoderConfig) RotateConfigOption {
+	return func(c *RotateConfig) {
+		c.EncoderConfig = cfg
+	}
+}
+
+func WithPaths(paths []string) RotateConfigOption {
+	return func(c *RotateConfig) {
+		if len(paths) > 0 {
+			c.Paths = paths
+		}
+	}
+}
+
+func WithSuffix(suffix string) RotateConfigOption {
+	return func(c *RotateConfig) {
+		if !handy.IsEmptyStr(suffix) {
+			c.Suffix = suffix
+		}
+	}
+}
+
+func WithLevel(level zapcore.Level) RotateConfigOption {
+	return func(c *RotateConfig) {
+		c.Level = level
+	}
+}
+
+func WithRotateTime(t time.Duration) RotateConfigOption {
+	return func(c *RotateConfig) {
+		if t > 0 {
+			c.RotateTime = t
+		}
+	}
+}
+
+func WithTTL(ttl time.Duration) RotateConfigOption {
+	return func(c *RotateConfig) {
+		if ttl > 0 {
+			c.TTL = ttl
+		}
+	}
+}
+
+func NewRotateLogger(opts ...RotateConfigOption) (*zap.SugaredLogger, error) {
+	cfg := &RotateConfig{
+		EncoderConfig: NewDefaultEncodeConfig(),
+		Paths:         []string{"stdout"},
+		Suffix:        "%Y%m%d_%H",
+		Level:         zapcore.DebugLevel,
+		RotateTime:    time.Hour,
+		TTL:           time.Hour * 24 * 7,
+	}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	level := zap.NewAtomicLevelAt(cfg.Level)
+	enc := zapcore.NewConsoleEncoder(cfg.EncoderConfig)
+	var cores []zapcore.Core
+	for _, path := range cfg.Paths {
+		switch path {
+		case "stdout":
+			cores = append(cores, zapcore.NewCore(enc, os.Stdout, level))
+		case "stderr":
+			cores = append(cores, zapcore.NewCore(enc, os.Stderr, level))
+		default:
+			w, err := rl.New(path+"."+cfg.Suffix,
+				rl.WithLinkName(path),
+				rl.WithRotationTime(cfg.RotateTime),
+				rl.WithMaxAge(cfg.TTL))
+			if err != nil {
+				return nil, err
+			}
+
+			cores = append(cores, zapcore.NewCore(enc, zapcore.AddSync(w), level))
+		}
+	}
+
+	return zap.New(zapcore.NewTee(cores...)).Sugar(), nil
+}
+
+func NewDefaultEncodeConfig() zapcore.EncoderConfig {
+	return zapcore.EncoderConfig{
+		TimeKey:     "T",
+		LevelKey:    "L",
+		NameKey:     "N",
+		CallerKey:   "C",
+		MessageKey:  "M",
+		LineEnding:  zapcore.DefaultLineEnding,
+		EncodeLevel: zapcore.CapitalLevelEncoder,
+		EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+			enc.AppendString(t.Format("2006-01-02 15:04:05"))
+		},
+		EncodeDuration:      zapcore.StringDurationEncoder,
+		NewReflectedEncoder: FasterJSONReflectedEncoder,
+	}
+}
+
+func FasterJSONReflectedEncoder(w io.Writer) zapcore.ReflectedEncoder {
+	enc := json.NewEncoder(w)
+	enc.SetEscapeHTML(false)
+	return enc
 }
 
 func SetLogger(l *zap.SugaredLogger) {
@@ -167,10 +274,4 @@ func FatalKV(msg string, fields ...zap.Field) {
 // PanicKV logs a message, then panics.
 func PanicKV(msg string, fields ...zap.Field) {
 	logger.Desugar().Panic(msg, fields...)
-}
-
-func FasterJSONReflectedEncoder(w io.Writer) zapcore.ReflectedEncoder {
-	enc := json.NewEncoder(w)
-	enc.SetEscapeHTML(false)
-	return enc
 }

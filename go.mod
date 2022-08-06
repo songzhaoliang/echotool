@@ -8,6 +8,7 @@ require (
 	github.com/google/go-querystring v1.1.0
 	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo v3.3.10+incompatible
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/popeyeio/handy v1.0.0
@@ -22,10 +23,13 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/google/uuid v1.1.1 // indirect
+	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
+	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fastrand v1.0.0 // indirect
