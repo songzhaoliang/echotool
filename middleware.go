@@ -3,6 +3,7 @@ package echotool
 import (
 	"github.com/labstack/echo"
 	"github.com/popeyeio/handy"
+	"moul.io/http2curl"
 )
 
 const (
@@ -48,6 +49,14 @@ func AddNotice(key, value string) HandlerFunc {
 	return func(c echo.Context, ec *Context) {
 		if !handy.IsEmptyStr(key) || !handy.IsEmptyStr(value) {
 			ec.SetCustomValue(key, value)
+		}
+	}
+}
+
+func PrintRequest() HandlerFunc {
+	return func(c echo.Context, ec *Context) {
+		if cmd, err := http2curl.GetCurlCommand(c.Request()); err == nil {
+			CtxInfoKV(ec, cmd.String())
 		}
 	}
 }

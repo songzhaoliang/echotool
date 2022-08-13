@@ -60,6 +60,7 @@ func NewDefaultEcho() *echo.Echo {
 func NewDefaultEngine(opts ...Option) *Engine {
 	e := NewEngine(opts...)
 	e.Use(AddTraceID(GetRequestID))
+	e.Use(PrintRequest())
 	return e
 }
 
