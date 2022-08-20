@@ -1,7 +1,9 @@
 package echotool
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/popeyeio/handy"
 )
@@ -19,7 +21,24 @@ type Context struct {
 	customValues map[string]string
 }
 
+var _ context.Context = (*Context)(nil)
 var _ fmt.Stringer = (*Context)(nil)
+
+func (ec *Context) Deadline() (deadline time.Time, ok bool) {
+	return
+}
+
+func (ec *Context) Done() <-chan struct{} {
+	return nil
+}
+
+func (ec *Context) Err() error {
+	return nil
+}
+
+func (ec *Context) Value(key any) any {
+	return nil
+}
 
 func (ec *Context) String() string {
 	if ec.ok {
