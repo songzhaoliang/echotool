@@ -1,7 +1,6 @@
 package echotool
 
 import (
-	"context"
 	"io"
 	"os"
 	"time"
@@ -11,8 +10,6 @@ import (
 	"github.com/songzhaoliang/echotool/json"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"gorm.io/gorm"
-	gl "gorm.io/gorm/logger"
 )
 
 var logger = NewDefaultLogger()
@@ -277,52 +274,4 @@ func FatalKV(msg string, fields ...zap.Field) {
 // PanicKV logs a message, then panics.
 func PanicKV(msg string, fields ...zap.Field) {
 	logger.Desugar().Panic(msg, fields...)
-}
-
-type GORMLogger struct {
-	SlowTime       time.Duration
-	IgnoreNoRecord bool
-}
-
-var _ gl.Interface = (*GORMLogger)(nil)
-
-func NewDefaultGORMLogger() *GORMLogger {
-	return &GORMLogger{
-		SlowTime:       time.Millisecond * 200,
-		IgnoreNoRecord: true,
-	}
-}
-
-func (l *GORMLogger) LogMode(gl.LogLevel) gl.Interface {
-	return l
-}
-
-func (l *GORMLogger) Info(ctx context.Context, format string, args ...interface{}) {
-	ec, _ := ctx.(*Context)
-	CtxInfo(ec, format, args...)
-}
-
-func (l *GORMLogger) Warn(ctx context.Context, format string, args ...interface{}) {
-	ec, _ := ctx.(*Context)
-	CtxWarn(ec, format, args...)
-}
-
-func (l *GORMLogger) Error(ctx context.Context, format string, args ...interface{}) {
-	ec, _ := ctx.(*Context)
-	CtxError(ec, format, args...)
-}
-
-func (l *GORMLogger) Trace(ctx context.Context, begin time.Time, f func() (string, int64), err error) {
-	ec, _ := ctx.(*Context)
-	tns := time.Since(begin)
-	tms := float64(tns.Nanoseconds()) / 1e6
-	sql, rows := f()
-	switch {
-	case err != nil && (err != gorm.ErrRecordNotFound || !l.IgnoreNoRecord):
-		CtxError(ec, "[%.3fms] [rows:%d] %s - %v", tms, rows, sql, err)
-	case l.SlowTime > 0 && tns > l.SlowTime:
-		CtxWarn(ec, "[%.3fms] [rows:%d] %s - slow sql > %v", tms, rows, sql, l.SlowTime)
-	default:
-		CtxInfo(ec, "[%.3fms] [rows:%d] %s", tms, rows, sql)
-	}
 }
