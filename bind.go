@@ -117,6 +117,17 @@ func MustYAMLBindBody(c echo.Context, v interface{}, cbs ...CallbackFunc) {
 	}, CodeBindErr, cbs...)
 }
 
+// BindEnv needs tag "env" in fields of v.
+func BindEnv(c echo.Context, v interface{}) error {
+	return binder.EnvBinder.Bind(c, v)
+}
+
+func MustBindEnv(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, BindEnv(c, v)
+	}, CodeBindErr, cbs...)
+}
+
 // Validate needs tag "valid" in fields of v.
 func Validate(v interface{}) error {
 	return validator.EchotoolValidator.ValidateStruct(v)
@@ -140,6 +151,7 @@ const (
 	BProtobufBody
 	BMsgpackBody
 	BYAMLBody
+	BEnv
 )
 
 var funcs = map[int]func(echo.Context, interface{}) error{
@@ -153,6 +165,7 @@ var funcs = map[int]func(echo.Context, interface{}) error{
 	BProtobufBody:  ProtobufBindBody,
 	BMsgpackBody:   MsgpackBindBody,
 	BYAMLBody:      YAMLBindBody,
+	BEnv:           BindEnv,
 }
 
 func Bind(c echo.Context, v interface{}, flag int) (err error) {
@@ -251,6 +264,11 @@ func (p *proxy) MsgpackBindBody() *proxy {
 
 func (p *proxy) YAMLBindBody() *proxy {
 	p.flag |= BYAMLBody
+	return p
+}
+
+func (p *proxy) BindEnv() *proxy {
+	p.flag |= BEnv
 	return p
 }
 

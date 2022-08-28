@@ -13,6 +13,7 @@ const (
 	KindQuery
 	KindPostForm
 	KindForm
+	KindEnv
 )
 
 var _ fmt.Stringer = (*Kind)(nil)
@@ -29,6 +30,8 @@ func (k Kind) String() string {
 		return "postform"
 	case KindForm:
 		return "form"
+	case KindEnv:
+		return "env"
 	}
 	return fmt.Sprintf("unknown kind: %d", k)
 }
@@ -65,6 +68,10 @@ func NewPostFormEmptyError(key string) *EmptyError {
 
 func NewFormEmptyError(key string) *EmptyError {
 	return NewEmptyError(KindForm, key)
+}
+
+func NewEnvEmptyError(key string) *EmptyError {
+	return NewEmptyError(KindEnv, key)
 }
 
 func (e EmptyError) Error() string {

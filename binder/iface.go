@@ -19,6 +19,7 @@ const (
 	TagProtobuf = "protobuf"
 	TagMsgpack  = "msgpack"
 	TagYAML     = "yaml"
+	TagEnv      = "env"
 )
 
 var (

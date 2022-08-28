@@ -316,6 +316,66 @@ func MustFormString(c echo.Context, key string, cbs ...CallbackFunc) string {
 	return result.(string)
 }
 
+func EnvBool(c echo.Context, key string) (bool, error) {
+	if v := os.Getenv(key); handy.IsEmptyStr(v) {
+		return false, NewEnvEmptyError(key)
+	} else {
+		return strconv.ParseBool(v)
+	}
+}
+
+func MustEnvBool(c echo.Context, key string, cbs ...CallbackFunc) bool {
+	result := MustDoCallback(func() (interface{}, error) {
+		return EnvBool(c, key)
+	}, CodeInternalErr, cbs...)
+	return result.(bool)
+}
+
+func EnvInt64(c echo.Context, key string) (int64, error) {
+	if v := os.Getenv(key); handy.IsEmptyStr(v) {
+		return 0, NewEnvEmptyError(key)
+	} else {
+		return strconv.ParseInt(v, 10, 64)
+	}
+}
+
+func MustEnvInt64(c echo.Context, key string, cbs ...CallbackFunc) int64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return EnvInt64(c, key)
+	}, CodeInternalErr, cbs...)
+	return result.(int64)
+}
+
+func EnvUint64(c echo.Context, key string) (uint64, error) {
+	if v := os.Getenv(key); handy.IsEmptyStr(v) {
+		return 0, NewEnvEmptyError(key)
+	} else {
+		return strconv.ParseUint(v, 10, 64)
+	}
+}
+
+func MustEnvUint64(c echo.Context, key string, cbs ...CallbackFunc) uint64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return EnvUint64(c, key)
+	}, CodeInternalErr, cbs...)
+	return result.(uint64)
+}
+
+func EnvString(c echo.Context, key string) (string, error) {
+	if v := os.Getenv(key); handy.IsEmptyStr(v) {
+		return handy.StrEmpty, NewEnvEmptyError(key)
+	} else {
+		return v, nil
+	}
+}
+
+func MustEnvString(c echo.Context, key string, cbs ...CallbackFunc) string {
+	result := MustDoCallback(func() (interface{}, error) {
+		return EnvString(c, key)
+	}, CodeInternalErr, cbs...)
+	return result.(string)
+}
+
 // EncodeValues needs tag "url" in fields of v.
 func EncodeValues(v interface{}) (url.Values, error) {
 	return query.Values(v)

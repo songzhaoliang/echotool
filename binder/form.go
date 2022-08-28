@@ -15,6 +15,7 @@ func (formBinder) Bind(c echo.Context, obj interface{}) error {
 	if err := c.Request().ParseForm(); err != nil {
 		return err
 	}
+
 	c.Request().ParseMultipartForm(memoryMax)
 	return bind(obj, c.Request().Form, TagForm, false)
 }

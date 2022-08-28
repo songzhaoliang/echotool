@@ -15,5 +15,6 @@ func (formPostBinder) Bind(c echo.Context, obj interface{}) error {
 	if err := c.Request().ParseForm(); err != nil {
 		return err
 	}
+
 	return bind(obj, c.Request().PostForm, TagForm, false)
 }
