@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"reflect"
+	rf "reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,8 +29,8 @@ func TestEchotoolValidator(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func IsValidUserID(v *vd.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
-	id := field.Int()
+func IsValidUserID(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
+	id := v.Int()
 
 	if id <= 0 {
 		return false
@@ -38,8 +38,8 @@ func IsValidUserID(v *vd.Validate, topStruct reflect.Value, currentStructOrField
 	return true
 }
 
-func IsValidUserName(v *vd.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
-	name := field.String()
+func IsValidUserName(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
+	name := v.String()
 
 	length := len(name)
 	if length < 2 || length > 50 {

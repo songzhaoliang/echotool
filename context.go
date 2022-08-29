@@ -36,7 +36,7 @@ func (ec *Context) Err() error {
 	return nil
 }
 
-func (ec *Context) Value(key any) any {
+func (ec *Context) Value(key interface{}) interface{} {
 	return nil
 }
 

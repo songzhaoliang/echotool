@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"reflect"
+	rf "reflect"
 
 	"github.com/labstack/echo"
 	"github.com/songzhaoliang/echotool"
@@ -50,8 +50,8 @@ func InitValidators() {
 	}
 }
 
-func IsValidUserID(v *vd.Validate, topStruct reflect.Value, currentStructOrField reflect.Value, field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string) bool {
-	id := field.Int()
+func IsValidUserID(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
+	id := v.Int()
 
 	if id <= 0 {
 		return false
