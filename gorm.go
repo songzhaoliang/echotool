@@ -61,9 +61,11 @@ func (l *GORMLogger) addPrefix(msg string) string {
 	return l.Prefix + " " + msg
 }
 
-func NewDefaultGORMConfig() *gorm.Config {
+// NewDefaultGORMConfig returns a default config with logger.
+// Note that you should set PrepareStmt to false when using clickhouse.
+func NewDefaultGORMConfig(isCached bool) *gorm.Config {
 	return &gorm.Config{
-		PrepareStmt: true,
+		PrepareStmt: isCached,
 		Logger:      NewDefaultGORMLogger(),
 	}
 }
