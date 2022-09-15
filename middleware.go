@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	KeyRequestID = "x_request_id"
+	KeyRequestID = "x-request-id"
 )
 
 func SetRequestID(f func(c echo.Context) string) echo.MiddlewareFunc {
