@@ -168,6 +168,19 @@ var funcs = map[int]func(echo.Context, interface{}) error{
 	BEnv:           BindEnv,
 }
 
+func RegisterBinder(flag int, fn func(echo.Context, interface{}) error) bool {
+	if _, exists := funcs[flag]; exists {
+		return false
+	}
+
+	funcs[flag] = fn
+	return true
+}
+
+func ForceRegisterBinder(flag int, fn func(echo.Context, interface{}) error) {
+	funcs[flag] = fn
+}
+
 func Bind(c echo.Context, v interface{}, flag int) (err error) {
 	if obj, ok := v.(binder.BeforeBinder); ok {
 		if err = obj.BeforeBind(c); err != nil {
