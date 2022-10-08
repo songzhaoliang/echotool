@@ -14,7 +14,7 @@ type paramBinder struct {
 var _ Binder = (*paramBinder)(nil)
 
 func (paramBinder) Bind(c echo.Context, obj interface{}) error {
-	return bind(obj, parseParam(c.ParamNames(), c.ParamValues()), TagParam, false)
+	return Bind(obj, parseParam(c.ParamNames(), c.ParamValues()), TagParam, false)
 }
 
 func parseParam(names, values []string) (v url.Values) {

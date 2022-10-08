@@ -16,5 +16,5 @@ func (formMultipartBinder) Bind(c echo.Context, obj interface{}) error {
 		return err
 	}
 
-	return bind(obj, c.Request().MultipartForm.Value, TagForm, false)
+	return Bind(obj, c.Request().MultipartForm.Value, TagForm, false)
 }

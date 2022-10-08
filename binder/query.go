@@ -12,5 +12,5 @@ type queryBinder struct {
 var _ Binder = (*queryBinder)(nil)
 
 func (queryBinder) Bind(c echo.Context, obj interface{}) error {
-	return bind(obj, c.Request().URL.Query(), TagForm, false)
+	return Bind(obj, c.Request().URL.Query(), TagForm, false)
 }

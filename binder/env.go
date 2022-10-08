@@ -16,7 +16,7 @@ type envBinder struct {
 var _ Binder = (*envBinder)(nil)
 
 func (envBinder) Bind(c echo.Context, obj interface{}) error {
-	return bind(obj, parseEnv(os.Environ()), TagEnv, false)
+	return Bind(obj, parseEnv(os.Environ()), TagEnv, false)
 }
 
 func parseEnv(envs []string) (v url.Values) {

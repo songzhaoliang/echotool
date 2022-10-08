@@ -16,5 +16,5 @@ func (formPostBinder) Bind(c echo.Context, obj interface{}) error {
 		return err
 	}
 
-	return bind(obj, c.Request().PostForm, TagForm, false)
+	return Bind(obj, c.Request().PostForm, TagForm, false)
 }
