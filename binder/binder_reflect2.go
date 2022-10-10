@@ -13,7 +13,7 @@ import (
 	"github.com/popeyeio/handy"
 )
 
-func bind(obj interface{}, values map[string][]string, tagKey string, canonical bool) error {
+func Bind(obj interface{}, values map[string][]string, tagKey string, canonical bool) error {
 	rt := getRTypeFromCache(obj)
 	ptr := reflect2.PtrOf(obj)
 
@@ -31,7 +31,7 @@ func bind(obj interface{}, values map[string][]string, tagKey string, canonical 
 			tag = rtf.Name()
 
 			if kind == reflect.Struct {
-				if err := bind(typ.PackEFace(fptr), values, tagKey, canonical); err != nil {
+				if err := Bind(typ.PackEFace(fptr), values, tagKey, canonical); err != nil {
 					return err
 				}
 				continue
@@ -49,12 +49,12 @@ func bind(obj interface{}, values map[string][]string, tagKey string, canonical 
 			elemKind := sliceType.Elem().Kind()
 			sliceType.UnsafeSet(fptr, sliceType.UnsafeMakeSlice(size, size))
 			for j := 0; j < size; j++ {
-				if err := setField(elemKind, vals[j], sliceType.UnsafeGetIndex(fptr, j)); err != nil {
+				if err := SetField(elemKind, vals[j], sliceType.UnsafeGetIndex(fptr, j)); err != nil {
 					return err
 				}
 			}
 		} else if size > 0 {
-			if err := setField(kind, vals[0], fptr); err != nil {
+			if err := SetField(kind, vals[0], fptr); err != nil {
 				return err
 			}
 		}
@@ -62,42 +62,42 @@ func bind(obj interface{}, values map[string][]string, tagKey string, canonical 
 	return nil
 }
 
-func setField(kind reflect.Kind, val string, ptr unsafe.Pointer) error {
+func SetField(kind reflect.Kind, val string, ptr unsafe.Pointer) error {
 	switch kind {
 	case reflect.Bool:
-		return setBoolField(val, ptr)
+		return SetBoolField(val, ptr)
 	case reflect.Int:
-		return setIntField(val, ptr)
+		return SetIntField(val, ptr)
 	case reflect.Int8:
-		return setInt8Field(val, ptr)
+		return SetInt8Field(val, ptr)
 	case reflect.Int16:
-		return setInt16Field(val, ptr)
+		return SetInt16Field(val, ptr)
 	case reflect.Int32:
-		return setInt32Field(val, ptr)
+		return SetInt32Field(val, ptr)
 	case reflect.Int64:
-		return setInt64Field(val, ptr)
+		return SetInt64Field(val, ptr)
 	case reflect.Uint:
-		return setUintField(val, ptr)
+		return SetUintField(val, ptr)
 	case reflect.Uint8:
-		return setUint8Field(val, ptr)
+		return SetUint8Field(val, ptr)
 	case reflect.Uint16:
-		return setUint16Field(val, ptr)
+		return SetUint16Field(val, ptr)
 	case reflect.Uint32:
-		return setUint32Field(val, ptr)
+		return SetUint32Field(val, ptr)
 	case reflect.Uint64:
-		return setUint64Field(val, ptr)
+		return SetUint64Field(val, ptr)
 	case reflect.Float32:
-		return setFloat32Field(val, ptr)
+		return SetFloat32Field(val, ptr)
 	case reflect.Float64:
-		return setFloat64Field(val, ptr)
+		return SetFloat64Field(val, ptr)
 	case reflect.String:
-		setString(val, ptr)
+		SetString(val, ptr)
 		return nil
 	}
 	return ErrInvalidType
 }
 
-func setBoolField(val string, ptr unsafe.Pointer) error {
+func SetBoolField(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseBool(convertValue(val))
 	if err == nil {
 		*(*bool)(ptr) = v
@@ -105,7 +105,7 @@ func setBoolField(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setIntField(val string, ptr unsafe.Pointer) error {
+func SetIntField(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseInt(convertValue(val), 10, 0)
 	if err == nil {
 		*(*int)(ptr) = int(v)
@@ -113,7 +113,7 @@ func setIntField(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setInt8Field(val string, ptr unsafe.Pointer) error {
+func SetInt8Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseInt(convertValue(val), 10, 8)
 	if err == nil {
 		*(*int8)(ptr) = int8(v)
@@ -121,7 +121,7 @@ func setInt8Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setInt16Field(val string, ptr unsafe.Pointer) error {
+func SetInt16Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseInt(convertValue(val), 10, 16)
 	if err == nil {
 		*(*int16)(ptr) = int16(v)
@@ -129,7 +129,7 @@ func setInt16Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setInt32Field(val string, ptr unsafe.Pointer) error {
+func SetInt32Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseInt(convertValue(val), 10, 32)
 	if err == nil {
 		*(*int32)(ptr) = int32(v)
@@ -137,7 +137,7 @@ func setInt32Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setInt64Field(val string, ptr unsafe.Pointer) error {
+func SetInt64Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseInt(convertValue(val), 10, 64)
 	if err == nil {
 		*(*int64)(ptr) = v
@@ -145,7 +145,7 @@ func setInt64Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setUintField(val string, ptr unsafe.Pointer) error {
+func SetUintField(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseUint(convertValue(val), 10, 0)
 	if err == nil {
 		*(*uint)(ptr) = uint(v)
@@ -153,7 +153,7 @@ func setUintField(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setUint8Field(val string, ptr unsafe.Pointer) error {
+func SetUint8Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseUint(convertValue(val), 10, 8)
 	if err == nil {
 		*(*uint8)(ptr) = uint8(v)
@@ -161,7 +161,7 @@ func setUint8Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setUint16Field(val string, ptr unsafe.Pointer) error {
+func SetUint16Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseUint(convertValue(val), 10, 16)
 	if err == nil {
 		*(*uint16)(ptr) = uint16(v)
@@ -169,7 +169,7 @@ func setUint16Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setUint32Field(val string, ptr unsafe.Pointer) error {
+func SetUint32Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseUint(convertValue(val), 10, 32)
 	if err == nil {
 		*(*uint32)(ptr) = uint32(v)
@@ -177,7 +177,7 @@ func setUint32Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setUint64Field(val string, ptr unsafe.Pointer) error {
+func SetUint64Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseUint(convertValue(val), 10, 64)
 	if err == nil {
 		*(*uint64)(ptr) = v
@@ -185,7 +185,7 @@ func setUint64Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setFloat32Field(val string, ptr unsafe.Pointer) error {
+func SetFloat32Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseFloat(convertValue(val), 32)
 	if err == nil {
 		*(*float32)(ptr) = float32(v)
@@ -193,7 +193,7 @@ func setFloat32Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setFloat64Field(val string, ptr unsafe.Pointer) error {
+func SetFloat64Field(val string, ptr unsafe.Pointer) error {
 	v, err := strconv.ParseFloat(convertValue(val), 64)
 	if err == nil {
 		*(*float64)(ptr) = v
@@ -201,7 +201,7 @@ func setFloat64Field(val string, ptr unsafe.Pointer) error {
 	return err
 }
 
-func setString(val string, ptr unsafe.Pointer) {
+func SetString(val string, ptr unsafe.Pointer) {
 	*(*string)(ptr) = val
 }
 
