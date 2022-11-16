@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/songzhaoliang/echotool/metrics"
 	"github.com/songzhaoliang/echotool/pprof"
 )
 
@@ -54,6 +55,7 @@ func NewDefaultEcho() *echo.Echo {
 	r.Use(middleware.Recover())
 	r.Use(SetRequestID(GetUUID))
 	pprof.Register(r)
+	metrics.Register(r)
 	return r
 }
 
