@@ -73,6 +73,10 @@ func (e *Engine) Use(middlewares ...HandlerFunc) *Engine {
 
 func (e *Engine) EchoHandler(handlers ...HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		if len(handlers) == 0 {
+			return nil
+		}
+
 		ec := e.acquireContext()
 		defer e.releaseContext(ec)
 
@@ -88,6 +92,7 @@ func (e *Engine) EchoHandler(handlers ...HandlerFunc) echo.HandlerFunc {
 			}
 		}()
 
+		ec.SetHandlerName(GetHandlerName(handlers[0]))
 		ec.handlers = append(ec.handlers, e.middlewares...)
 		ec.handlers = append(ec.handlers, handlers...)
 

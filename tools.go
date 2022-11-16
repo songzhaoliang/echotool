@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
+	"runtime"
 	"strconv"
+	"strings"
 
 	"github.com/google/go-querystring/query"
 	"github.com/labstack/echo"
@@ -453,4 +456,9 @@ func GetUUID(c echo.Context) (u string) {
 func GetHostname() (host string) {
 	host, _ = os.Hostname()
 	return
+}
+
+func GetHandlerName(f HandlerFunc) string {
+	name := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+	return name[strings.LastIndex(name, handy.StrDot)+1:]
 }

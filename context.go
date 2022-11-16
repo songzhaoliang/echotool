@@ -9,8 +9,9 @@ import (
 )
 
 type Context struct {
-	engine   *Engine
-	handlers HandlerFuncsChain
+	engine      *Engine
+	handlers    HandlerFuncsChain
+	handlerName string
 
 	ok   bool
 	code int
@@ -45,6 +46,14 @@ func (ec *Context) String() string {
 		return fmt.Sprintf("code:%d, data:%s", ec.code, handy.Stringify(ec.data))
 	}
 	return fmt.Sprintf("code:%d, error:%v", ec.code, ec.err)
+}
+
+func (ec *Context) GetHandlerName() string {
+	return ec.handlerName
+}
+
+func (ec *Context) SetHandlerName(name string) {
+	ec.handlerName = name
 }
 
 func (ec *Context) Finish(code int, data interface{}) {
@@ -99,10 +108,11 @@ func (ec *Context) GetCustomValues() map[string]string {
 func (ec *Context) reset() {
 	ec.engine = nil
 	ec.handlers = ec.handlers[:0]
+	ec.handlerName = handy.StrEmpty
 	ec.ok = false
 	ec.code = 0
 	ec.data = nil
 	ec.err = nil
-	ec.namedValue = ""
+	ec.namedValue = handy.StrEmpty
 	ec.customValues = nil
 }
