@@ -17,6 +17,9 @@ type MetricsType int
 
 const (
 	MetricsTypeCounter MetricsType = iota
+	MetricsTypeGauge
+	MetricsTypeHistogram
+	MetricsTypeSummary
 )
 
 var _ fmt.Stringer = (*MetricsType)(nil)
@@ -25,6 +28,12 @@ func (t MetricsType) String() string {
 	switch t {
 	case MetricsTypeCounter:
 		return "counter"
+	case MetricsTypeGauge:
+		return "gauge"
+	case MetricsTypeHistogram:
+		return "histogram"
+	case MetricsTypeSummary:
+		return "summary"
 	}
 	return fmt.Sprintf("unknown metrics type: %d", t)
 }
@@ -32,6 +41,7 @@ func (t MetricsType) String() string {
 var (
 	ErrMetricsExists         = errors.New("metrics exists")
 	ErrMetricsNotExists      = errors.New("metrics not exists")
+	ErrUnknownMetricsType    = errors.New("unknown metrics type")
 	ErrMetricsTypeNotMatches = errors.New("metrics type not matches")
 )
 
@@ -72,7 +82,43 @@ func (c *MetricsClient) DefineCounter(name string, parser LabelsParser) error {
 		ConstLabels: c.GlobalLabels,
 	}, Model(parser))
 
-	if _, exists := c.AllMetrics.LoadOrStore(name, cv); exists {
+	return c.define(name, cv)
+}
+
+func (c *MetricsClient) DefineGauge(name string, parser LabelsParser) error {
+	gv := promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace:   c.Namespace,
+		Name:        name,
+		ConstLabels: c.GlobalLabels,
+	}, Model(parser))
+
+	return c.define(name, gv)
+}
+
+func (c *MetricsClient) DefineHistogram(name string, parser LabelsParser, buckets []float64) error {
+	hv := promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace:   c.Namespace,
+		Name:        name,
+		ConstLabels: c.GlobalLabels,
+		Buckets:     buckets,
+	}, Model(parser))
+
+	return c.define(name, hv)
+}
+
+func (c *MetricsClient) DefineSummary(name string, parser LabelsParser) error {
+	sv := promauto.NewSummaryVec(prometheus.SummaryOpts{
+		Namespace:   c.Namespace,
+		Name:        name,
+		ConstLabels: c.GlobalLabels,
+		Objectives:  map[float64]float64{0.5: 0.05, 0.8: 0.01, 0.9: 0.01, 0.95: 0.001, 0.99: 0.001},
+	}, Model(parser))
+
+	return c.define(name, sv)
+}
+
+func (c *MetricsClient) define(name string, metrics interface{}) error {
+	if _, exists := c.AllMetrics.LoadOrStore(name, metrics); exists {
 		return ErrMetricsExists
 	}
 	return nil
@@ -89,12 +135,72 @@ func (c *MetricsClient) EmitCounter(name string, value float64, parser LabelsPar
 		return ErrMetricsTypeNotMatches
 	}
 
-	counter, err := cv.GetMetricWith(prometheus.Labels(parser.ParseToLabels()))
+	counter, err := cv.GetMetricWith(parser.ParseToLabels())
 	if err != nil {
 		return err
 	}
 
 	counter.Add(value)
+	return nil
+}
+
+func (c *MetricsClient) EmitGauge(name string, value float64, parser LabelsParser) error {
+	metrics, exists := c.AllMetrics.Load(name)
+	if !exists {
+		return ErrMetricsNotExists
+	}
+
+	gv, ok := metrics.(*prometheus.GaugeVec)
+	if !ok {
+		return ErrMetricsTypeNotMatches
+	}
+
+	gauge, err := gv.GetMetricWith(parser.ParseToLabels())
+	if err != nil {
+		return err
+	}
+
+	gauge.Set(value)
+	return nil
+}
+
+func (c *MetricsClient) EmitHistogram(name string, value float64, parser LabelsParser) error {
+	metrics, exists := c.AllMetrics.Load(name)
+	if !exists {
+		return ErrMetricsNotExists
+	}
+
+	hv, ok := metrics.(*prometheus.HistogramVec)
+	if !ok {
+		return ErrMetricsTypeNotMatches
+	}
+
+	histogram, err := hv.GetMetricWith(parser.ParseToLabels())
+	if err != nil {
+		return err
+	}
+
+	histogram.Observe(value)
+	return nil
+}
+
+func (c *MetricsClient) EmitSummary(name string, value float64, parser LabelsParser) error {
+	metrics, exists := c.AllMetrics.Load(name)
+	if !exists {
+		return ErrMetricsNotExists
+	}
+
+	sv, ok := metrics.(*prometheus.SummaryVec)
+	if !ok {
+		return ErrMetricsTypeNotMatches
+	}
+
+	summary, err := sv.GetMetricWith(parser.ParseToLabels())
+	if err != nil {
+		return err
+	}
+
+	summary.Observe(value)
 	return nil
 }
 
@@ -117,6 +223,18 @@ func SetMetricsClient(c *MetricsClient) {
 
 func EmitCounter(name string, value float64, parser LabelsParser) error {
 	return DefaultMetricsClient.EmitCounter(name, value, parser)
+}
+
+func EmitGauge(name string, value float64, parser LabelsParser) error {
+	return DefaultMetricsClient.EmitGauge(name, value, parser)
+}
+
+func EmitHistogram(name string, value float64, parser LabelsParser) error {
+	return DefaultMetricsClient.EmitHistogram(name, value, parser)
+}
+
+func EmitSummary(name string, value float64, parser LabelsParser) error {
+	return DefaultMetricsClient.EmitSummary(name, value, parser)
 }
 
 func Register(r *echo.Echo, prefixes ...string) {
