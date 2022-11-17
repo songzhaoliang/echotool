@@ -4,34 +4,9 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/songzhaoliang/echotool"
 	"github.com/songzhaoliang/echotool/metrics"
 )
-
-var ThroughputCounter = promauto.NewCounterVec(prometheus.CounterOpts{
-	Namespace: "echotool",
-	Name:      "throughput",
-}, metrics.Model(&ThroughputTag{}))
-
-type ThroughputTag struct {
-	Handler string
-}
-
-var _ metrics.LabelsParser = (*ThroughputTag)(nil)
-
-func NewThroughputTag(handler string) *ThroughputTag {
-	return &ThroughputTag{
-		handler,
-	}
-}
-
-func (t *ThroughputTag) ParseToLabels() prometheus.Labels {
-	return prometheus.Labels{
-		"handler": t.Handler,
-	}
-}
 
 type User struct {
 	ID   int    `json:"id"`
@@ -39,6 +14,8 @@ type User struct {
 }
 
 func main() {
+	InitMetrics()
+
 	r := echo.New()
 	metrics.Register(r)
 
@@ -50,7 +27,7 @@ func main() {
 }
 
 func CreateUser(c echo.Context, ec *echotool.Context) {
-	ThroughputCounter.With(NewThroughputTag("CreateUser").ParseToLabels()).Add(1)
+	metrics.EmitCounter("throughput", 1, NewThroughputLabels(ec.GetHandlerName()))
 
 	user := &User{}
 	echotool.New(c, user).JSONBindBody().MustEnd()
@@ -58,4 +35,28 @@ func CreateUser(c echo.Context, ec *echotool.Context) {
 	fmt.Printf("user is %+v\n", user)
 
 	ec.Finish(echotool.CodeOKZero, nil)
+}
+
+func InitMetrics() {
+	c := metrics.NewMetricsClient(metrics.WithNamespace("echotool"))
+	c.DefineCounter("throughput", &ThroughputLabels{})
+	metrics.SetMetricsClient(c)
+}
+
+type ThroughputLabels struct {
+	Handler string
+}
+
+var _ metrics.LabelsParser = (*ThroughputLabels)(nil)
+
+func NewThroughputLabels(handler string) *ThroughputLabels {
+	return &ThroughputLabels{
+		Handler: handler,
+	}
+}
+
+func (ls *ThroughputLabels) ParseToLabels() map[string]string {
+	return map[string]string{
+		"handler": ls.Handler,
+	}
 }

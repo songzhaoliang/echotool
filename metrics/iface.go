@@ -1,9 +1,5 @@
 package metrics
 
-import (
-	"github.com/prometheus/client_golang/prometheus"
-)
-
 type LabelsParser interface {
-	ParseToLabels() prometheus.Labels
+	ParseToLabels() map[string]string
 }
