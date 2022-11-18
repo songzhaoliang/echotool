@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/labstack/echo"
 	"github.com/popeyeio/handy"
@@ -37,6 +38,11 @@ func (t MetricsType) String() string {
 	}
 	return fmt.Sprintf("unknown metrics type: %d", t)
 }
+
+var (
+	DefaultBuckets    = []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10}
+	DefaultObjectives = map[float64]float64{.5: .05, .8: .01, .9: .01, .95: .001, .99: .001}
+)
 
 var (
 	ErrMetricsExists         = errors.New("metrics exists")
@@ -106,12 +112,12 @@ func (c *MetricsClient) DefineHistogram(name string, parser LabelsParser, bucket
 	return c.define(name, hv)
 }
 
-func (c *MetricsClient) DefineSummary(name string, parser LabelsParser) error {
+func (c *MetricsClient) DefineSummary(name string, parser LabelsParser, objectives map[float64]float64) error {
 	sv := promauto.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:   c.Namespace,
 		Name:        name,
 		ConstLabels: c.GlobalLabels,
-		Objectives:  map[float64]float64{0.5: 0.05, 0.8: 0.01, 0.9: 0.01, 0.95: 0.001, 0.99: 0.001},
+		Objectives:  objectives,
 	}, Model(parser))
 
 	return c.define(name, sv)
@@ -233,8 +239,16 @@ func EmitHistogram(name string, value float64, parser LabelsParser) error {
 	return DefaultMetricsClient.EmitHistogram(name, value, parser)
 }
 
+func EmitHistogramTimer(name string, t time.Time, parser LabelsParser) error {
+	return EmitHistogram(name, float64(time.Since(t).Nanoseconds()/1000), parser)
+}
+
 func EmitSummary(name string, value float64, parser LabelsParser) error {
 	return DefaultMetricsClient.EmitSummary(name, value, parser)
+}
+
+func EmitSummaryTimer(name string, t time.Time, parser LabelsParser) error {
+	return EmitSummary(name, float64(time.Since(t).Nanoseconds()/1000), parser)
 }
 
 func Register(r *echo.Echo, prefixes ...string) {
