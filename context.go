@@ -20,6 +20,8 @@ type Context struct {
 
 	namedValue   string
 	customValues map[string]string
+
+	startTime time.Time
 }
 
 var _ context.Context = (*Context)(nil)
@@ -46,14 +48,6 @@ func (ec *Context) String() string {
 		return fmt.Sprintf("code:%d, data:%s", ec.code, handy.Stringify(ec.data))
 	}
 	return fmt.Sprintf("code:%d, error:%v", ec.code, ec.err)
-}
-
-func (ec *Context) GetHandlerName() string {
-	return ec.handlerName
-}
-
-func (ec *Context) SetHandlerName(name string) {
-	ec.handlerName = name
 }
 
 func (ec *Context) Finish(code int, data interface{}) {
@@ -103,6 +97,14 @@ func (ec *Context) SetCustomValue(key, value string) {
 
 func (ec *Context) GetCustomValues() map[string]string {
 	return ec.customValues
+}
+
+func (ec *Context) GetHandlerName() string {
+	return ec.handlerName
+}
+
+func (ec *Context) GetStartTime() time.Time {
+	return ec.startTime
 }
 
 func (ec *Context) reset() {

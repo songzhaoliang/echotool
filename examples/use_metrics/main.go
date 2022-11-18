@@ -8,6 +8,10 @@ import (
 	"github.com/songzhaoliang/echotool/metrics"
 )
 
+const (
+	MThroughput = "throughput"
+)
+
 type User struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
@@ -27,7 +31,7 @@ func main() {
 }
 
 func CreateUser(c echo.Context, ec *echotool.Context) {
-	metrics.EmitCounter("throughput", 1, NewThroughputLabels(ec.GetHandlerName()))
+	metrics.EmitCounter(MThroughput, 1, NewThroughputLabels(ec.GetHandlerName()))
 
 	user := &User{}
 	echotool.New(c, user).JSONBindBody().MustEnd()
@@ -39,7 +43,7 @@ func CreateUser(c echo.Context, ec *echotool.Context) {
 
 func InitMetrics() {
 	c := metrics.NewMetricsClient(metrics.WithNamespace("echotool"))
-	c.DefineCounter("throughput", &ThroughputLabels{})
+	c.DefineCounter(MThroughput, &ThroughputLabels{})
 	metrics.SetMetricsClient(c)
 }
 

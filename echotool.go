@@ -2,6 +2,7 @@ package echotool
 
 import (
 	"sync"
+	"time"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -92,7 +93,7 @@ func (e *Engine) EchoHandler(handlers ...HandlerFunc) echo.HandlerFunc {
 			}
 		}()
 
-		ec.SetHandlerName(GetHandlerName(handlers[0]))
+		ec.handlerName = GetHandlerName(handlers[0])
 		ec.handlers = append(ec.handlers, e.middlewares...)
 		ec.handlers = append(ec.handlers, handlers...)
 
@@ -124,6 +125,7 @@ func (e *Engine) acquireContext() (ec *Context) {
 	ec.engine = e
 	ec.ok = true
 	ec.customValues = make(map[string]string)
+	ec.startTime = time.Now()
 	return
 }
 
