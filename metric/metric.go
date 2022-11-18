@@ -1,4 +1,4 @@
-package metrics
+package metric
 
 import (
 	"errors"
@@ -14,29 +14,29 @@ import (
 	"github.com/songzhaoliang/echotool/util"
 )
 
-type MetricsType int
+type MetricType int
 
 const (
-	MetricsTypeCounter MetricsType = iota
-	MetricsTypeGauge
-	MetricsTypeHistogram
-	MetricsTypeSummary
+	MetricTypeCounter MetricType = iota
+	MetricTypeGauge
+	MetricTypeHistogram
+	MetricTypeSummary
 )
 
-var _ fmt.Stringer = (*MetricsType)(nil)
+var _ fmt.Stringer = (*MetricType)(nil)
 
-func (t MetricsType) String() string {
+func (t MetricType) String() string {
 	switch t {
-	case MetricsTypeCounter:
+	case MetricTypeCounter:
 		return "counter"
-	case MetricsTypeGauge:
+	case MetricTypeGauge:
 		return "gauge"
-	case MetricsTypeHistogram:
+	case MetricTypeHistogram:
 		return "histogram"
-	case MetricsTypeSummary:
+	case MetricTypeSummary:
 		return "summary"
 	}
-	return fmt.Sprintf("unknown metrics type: %d", t)
+	return fmt.Sprintf("unknown metric type: %d", t)
 }
 
 var (
@@ -45,43 +45,43 @@ var (
 )
 
 var (
-	ErrMetricsExists         = errors.New("metrics exists")
-	ErrMetricsNotExists      = errors.New("metrics not exists")
-	ErrUnknownMetricsType    = errors.New("unknown metrics type")
-	ErrMetricsTypeNotMatches = errors.New("metrics type not matches")
+	ErrMetricExists         = errors.New("metric exists")
+	ErrMetricNotExists      = errors.New("metric not exists")
+	ErrUnknownMetricType    = errors.New("unknown metric type")
+	ErrMetricTypeNotMatches = errors.New("metric type not matches")
 )
 
-type MetricsClient struct {
+type MetricClient struct {
 	Namespace    string
 	GlobalLabels prometheus.Labels
 	AllMetrics   sync.Map
 }
 
-type MetricsClientOption func(*MetricsClient)
+type MetricClientOption func(*MetricClient)
 
-func WithNamespace(namespace string) MetricsClientOption {
-	return func(c *MetricsClient) {
+func WithNamespace(namespace string) MetricClientOption {
+	return func(c *MetricClient) {
 		c.Namespace = namespace
 	}
 }
 
-func WithGlobalLabel(key, value string) MetricsClientOption {
-	return func(c *MetricsClient) {
+func WithGlobalLabel(key, value string) MetricClientOption {
+	return func(c *MetricClient) {
 		if !handy.IsEmptyStr(key) && !handy.IsEmptyStr(value) {
 			c.GlobalLabels[key] = value
 		}
 	}
 }
 
-func NewMetricsClient(opts ...MetricsClientOption) (c *MetricsClient) {
-	c = &MetricsClient{}
+func NewMetricClient(opts ...MetricClientOption) (c *MetricClient) {
+	c = &MetricClient{}
 	for _, opt := range opts {
 		opt(c)
 	}
 	return
 }
 
-func (c *MetricsClient) DefineCounter(name string, parser LabelsParser) error {
+func (c *MetricClient) DefineCounter(name string, parser LabelsParser) error {
 	cv := promauto.NewCounterVec(prometheus.CounterOpts{
 		Namespace:   c.Namespace,
 		Name:        name,
@@ -91,7 +91,7 @@ func (c *MetricsClient) DefineCounter(name string, parser LabelsParser) error {
 	return c.define(name, cv)
 }
 
-func (c *MetricsClient) DefineGauge(name string, parser LabelsParser) error {
+func (c *MetricClient) DefineGauge(name string, parser LabelsParser) error {
 	gv := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace:   c.Namespace,
 		Name:        name,
@@ -101,7 +101,7 @@ func (c *MetricsClient) DefineGauge(name string, parser LabelsParser) error {
 	return c.define(name, gv)
 }
 
-func (c *MetricsClient) DefineHistogram(name string, parser LabelsParser, buckets []float64) error {
+func (c *MetricClient) DefineHistogram(name string, parser LabelsParser, buckets []float64) error {
 	hv := promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace:   c.Namespace,
 		Name:        name,
@@ -112,7 +112,7 @@ func (c *MetricsClient) DefineHistogram(name string, parser LabelsParser, bucket
 	return c.define(name, hv)
 }
 
-func (c *MetricsClient) DefineSummary(name string, parser LabelsParser, objectives map[float64]float64) error {
+func (c *MetricClient) DefineSummary(name string, parser LabelsParser, objectives map[float64]float64) error {
 	sv := promauto.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:   c.Namespace,
 		Name:        name,
@@ -123,22 +123,22 @@ func (c *MetricsClient) DefineSummary(name string, parser LabelsParser, objectiv
 	return c.define(name, sv)
 }
 
-func (c *MetricsClient) define(name string, metrics interface{}) error {
-	if _, exists := c.AllMetrics.LoadOrStore(name, metrics); exists {
-		return ErrMetricsExists
+func (c *MetricClient) define(name string, metric interface{}) error {
+	if _, exists := c.AllMetrics.LoadOrStore(name, metric); exists {
+		return ErrMetricExists
 	}
 	return nil
 }
 
-func (c *MetricsClient) EmitCounter(name string, value float64, parser LabelsParser) error {
-	metrics, exists := c.AllMetrics.Load(name)
+func (c *MetricClient) EmitCounter(name string, value float64, parser LabelsParser) error {
+	metric, exists := c.AllMetrics.Load(name)
 	if !exists {
-		return ErrMetricsNotExists
+		return ErrMetricNotExists
 	}
 
-	cv, ok := metrics.(*prometheus.CounterVec)
+	cv, ok := metric.(*prometheus.CounterVec)
 	if !ok {
-		return ErrMetricsTypeNotMatches
+		return ErrMetricTypeNotMatches
 	}
 
 	counter, err := cv.GetMetricWith(parser.ParseToLabels())
@@ -150,15 +150,15 @@ func (c *MetricsClient) EmitCounter(name string, value float64, parser LabelsPar
 	return nil
 }
 
-func (c *MetricsClient) EmitGauge(name string, value float64, parser LabelsParser) error {
-	metrics, exists := c.AllMetrics.Load(name)
+func (c *MetricClient) EmitGauge(name string, value float64, parser LabelsParser) error {
+	metric, exists := c.AllMetrics.Load(name)
 	if !exists {
-		return ErrMetricsNotExists
+		return ErrMetricNotExists
 	}
 
-	gv, ok := metrics.(*prometheus.GaugeVec)
+	gv, ok := metric.(*prometheus.GaugeVec)
 	if !ok {
-		return ErrMetricsTypeNotMatches
+		return ErrMetricTypeNotMatches
 	}
 
 	gauge, err := gv.GetMetricWith(parser.ParseToLabels())
@@ -170,15 +170,15 @@ func (c *MetricsClient) EmitGauge(name string, value float64, parser LabelsParse
 	return nil
 }
 
-func (c *MetricsClient) EmitHistogram(name string, value float64, parser LabelsParser) error {
-	metrics, exists := c.AllMetrics.Load(name)
+func (c *MetricClient) EmitHistogram(name string, value float64, parser LabelsParser) error {
+	metric, exists := c.AllMetrics.Load(name)
 	if !exists {
-		return ErrMetricsNotExists
+		return ErrMetricNotExists
 	}
 
-	hv, ok := metrics.(*prometheus.HistogramVec)
+	hv, ok := metric.(*prometheus.HistogramVec)
 	if !ok {
-		return ErrMetricsTypeNotMatches
+		return ErrMetricTypeNotMatches
 	}
 
 	histogram, err := hv.GetMetricWith(parser.ParseToLabels())
@@ -190,15 +190,15 @@ func (c *MetricsClient) EmitHistogram(name string, value float64, parser LabelsP
 	return nil
 }
 
-func (c *MetricsClient) EmitSummary(name string, value float64, parser LabelsParser) error {
-	metrics, exists := c.AllMetrics.Load(name)
+func (c *MetricClient) EmitSummary(name string, value float64, parser LabelsParser) error {
+	metric, exists := c.AllMetrics.Load(name)
 	if !exists {
-		return ErrMetricsNotExists
+		return ErrMetricNotExists
 	}
 
-	sv, ok := metrics.(*prometheus.SummaryVec)
+	sv, ok := metric.(*prometheus.SummaryVec)
 	if !ok {
-		return ErrMetricsTypeNotMatches
+		return ErrMetricTypeNotMatches
 	}
 
 	summary, err := sv.GetMetricWith(parser.ParseToLabels())
@@ -219,32 +219,32 @@ func Model(parser LabelsParser) (keys []string) {
 	return
 }
 
-var DefaultMetricsClient = NewMetricsClient()
+var DefaultMetricClient = NewMetricClient()
 
-func SetMetricsClient(c *MetricsClient) {
+func SetMetricClient(c *MetricClient) {
 	if c != nil {
-		DefaultMetricsClient = c
+		DefaultMetricClient = c
 	}
 }
 
 func EmitCounter(name string, value float64, parser LabelsParser) error {
-	return DefaultMetricsClient.EmitCounter(name, value, parser)
+	return DefaultMetricClient.EmitCounter(name, value, parser)
 }
 
 func EmitGauge(name string, value float64, parser LabelsParser) error {
-	return DefaultMetricsClient.EmitGauge(name, value, parser)
+	return DefaultMetricClient.EmitGauge(name, value, parser)
 }
 
 func EmitHistogram(name string, value float64, parser LabelsParser) error {
-	return DefaultMetricsClient.EmitHistogram(name, value, parser)
+	return DefaultMetricClient.EmitHistogram(name, value, parser)
 }
 
 func EmitHistogramTimer(name string, t time.Time, parser LabelsParser) error {
-	return EmitHistogram(name, float64(time.Since(t).Nanoseconds()/1000), parser)
+	return EmitHistogram(name, time.Since(t).Seconds(), parser)
 }
 
 func EmitSummary(name string, value float64, parser LabelsParser) error {
-	return DefaultMetricsClient.EmitSummary(name, value, parser)
+	return DefaultMetricClient.EmitSummary(name, value, parser)
 }
 
 func EmitSummaryTimer(name string, t time.Time, parser LabelsParser) error {

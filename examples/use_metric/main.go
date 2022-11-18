@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/songzhaoliang/echotool"
-	"github.com/songzhaoliang/echotool/metrics"
+	"github.com/songzhaoliang/echotool/metric"
 )
 
 const (
@@ -21,7 +21,7 @@ func main() {
 	InitMetrics()
 
 	r := echo.New()
-	metrics.Register(r)
+	metric.Register(r)
 
 	e := echotool.NewEngine()
 
@@ -31,7 +31,7 @@ func main() {
 }
 
 func CreateUser(c echo.Context, ec *echotool.Context) {
-	metrics.EmitCounter(MThroughput, 1, NewThroughputLabels(ec.GetHandlerName()))
+	metric.EmitCounter(MThroughput, 1, NewThroughputLabels(ec.GetHandlerName()))
 
 	user := &User{}
 	echotool.New(c, user).JSONBindBody().MustEnd()
@@ -42,16 +42,16 @@ func CreateUser(c echo.Context, ec *echotool.Context) {
 }
 
 func InitMetrics() {
-	c := metrics.NewMetricsClient(metrics.WithNamespace("echotool"))
+	c := metric.NewMetricClient(metric.WithNamespace("echotool"))
 	c.DefineCounter(MThroughput, &ThroughputLabels{})
-	metrics.SetMetricsClient(c)
+	metric.SetMetricClient(c)
 }
 
 type ThroughputLabels struct {
 	Handler string
 }
 
-var _ metrics.LabelsParser = (*ThroughputLabels)(nil)
+var _ metric.LabelsParser = (*ThroughputLabels)(nil)
 
 func NewThroughputLabels(handler string) *ThroughputLabels {
 	return &ThroughputLabels{
