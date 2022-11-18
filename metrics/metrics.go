@@ -248,7 +248,7 @@ func EmitSummary(name string, value float64, parser LabelsParser) error {
 }
 
 func EmitSummaryTimer(name string, t time.Time, parser LabelsParser) error {
-	return EmitSummary(name, float64(time.Since(t).Nanoseconds()/1000), parser)
+	return EmitSummary(name, time.Since(t).Seconds(), parser)
 }
 
 func Register(r *echo.Echo, prefixes ...string) {
