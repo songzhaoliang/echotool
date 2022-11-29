@@ -2,7 +2,7 @@ package echotool
 
 import (
 	"bytes"
-	"mime/multipart"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -320,17 +320,22 @@ func MustFormString(c echo.Context, key string, cbs ...CallbackFunc) string {
 	return result.(string)
 }
 
-// MustFormFile parses multipart message with panic.
-// Note: Close needs to be called after MustFormFile is called successfully.
-func MustFormFile(c echo.Context, key string, cbs ...CallbackFunc) multipart.File {
+func MustFormFile(c echo.Context, key string, cbs ...CallbackFunc) []byte {
 	result := MustDoCallback(func() (interface{}, error) {
-		if file, err := c.FormFile(key); err != nil {
+		fh, err := c.FormFile(key)
+		if err != nil {
 			return nil, err
-		} else {
-			return file.Open()
 		}
+
+		f, err := fh.Open()
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+
+		return ioutil.ReadAll(f)
 	}, CodeBadRequest, cbs...)
-	return result.(multipart.File)
+	return result.([]byte)
 }
 
 func EnvBool(c echo.Context, key string) (bool, error) {
