@@ -33,6 +33,8 @@ const (
 	CodePostgreSQLErr      = 50015
 	CodeRedisErr           = 50016
 	CodeClickHouseErr      = 50017
+	CodeMongoDBErr         = 50018
+	CodeElasticsearchErr   = 50019
 	CodeNSQErr             = 50030
 	CodeKafkaErr           = 50031
 	CodeRocketMQErr        = 50032
@@ -70,6 +72,8 @@ var codeMsg = map[int]string{
 	CodePostgreSQLErr:      "postgresql error",
 	CodeRedisErr:           "redis error",
 	CodeClickHouseErr:      "clickhouse error",
+	CodeMongoDBErr:         "mongodb error",
+	CodeElasticsearchErr:   "elasticsearch error",
 	CodeNSQErr:             "nsq error",
 	CodeKafkaErr:           "kafka error",
 	CodeRocketMQErr:        "rocketmq error",
@@ -114,6 +118,8 @@ var httpStatus = map[int]int{
 	CodePostgreSQLErr:      http.StatusInternalServerError,
 	CodeRedisErr:           http.StatusInternalServerError,
 	CodeClickHouseErr:      http.StatusInternalServerError,
+	CodeMongoDBErr:         http.StatusInternalServerError,
+	CodeElasticsearchErr:   http.StatusInternalServerError,
 	CodeNSQErr:             http.StatusInternalServerError,
 	CodeKafkaErr:           http.StatusInternalServerError,
 	CodeRocketMQErr:        http.StatusInternalServerError,
