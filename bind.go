@@ -62,6 +62,17 @@ func MustFormBindQueryBody(c echo.Context, v interface{}, cbs ...CallbackFunc) {
 	}, CodeBindErr, cbs...)
 }
 
+// FormBindMultipart needs tag "form" in fields of v.
+func FormBindMultipart(c echo.Context, v interface{}) error {
+	return binder.FormMultipartBinder.Bind(c, v)
+}
+
+func MustFormBindMultipart(c echo.Context, v interface{}, cbs ...CallbackFunc) {
+	MustDoCallback(func() (interface{}, error) {
+		return nil, FormBindMultipart(c, v)
+	}, CodeBindErr, cbs...)
+}
+
 // JSONBindBody needs tag "json" in fields of v.
 func JSONBindBody(c echo.Context, v interface{}) error {
 	return binder.JSONBodyBinder.Bind(c, v)
@@ -146,6 +157,7 @@ const (
 	BFormQuery
 	BFormBody
 	BFormQueryBody
+	BFormMultipart
 	BJSONBody
 	BXMLBody
 	BProtobufBody
@@ -160,6 +172,7 @@ var funcs = map[int]func(echo.Context, interface{}) error{
 	BFormQuery:     FormBindQuery,
 	BFormBody:      FormBindBody,
 	BFormQueryBody: FormBindQueryBody,
+	BFormMultipart: FormBindMultipart,
 	BJSONBody:      JSONBindBody,
 	BXMLBody:       XMLBindBody,
 	BProtobufBody:  ProtobufBindBody,
@@ -252,6 +265,11 @@ func (p *proxy) FormBindBody() *proxy {
 
 func (p *proxy) FormBindQueryBody() *proxy {
 	p.flag |= BFormQueryBody
+	return p
+}
+
+func (p *proxy) FormBindMultipart() *proxy {
+	p.flag |= BFormMultipart
 	return p
 }
 
