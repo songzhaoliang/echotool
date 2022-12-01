@@ -320,7 +320,12 @@ func MustFormString(c echo.Context, key string, cbs ...CallbackFunc) string {
 	return result.(string)
 }
 
-func MustFormFile(c echo.Context, key string, cbs ...CallbackFunc) []byte {
+type FileInfo struct {
+	Name    string
+	Content []byte
+}
+
+func MustFormFile(c echo.Context, key string, cbs ...CallbackFunc) *FileInfo {
 	result := MustDoCallback(func() (interface{}, error) {
 		fh, err := c.FormFile(key)
 		if err != nil {
@@ -333,9 +338,17 @@ func MustFormFile(c echo.Context, key string, cbs ...CallbackFunc) []byte {
 		}
 		defer f.Close()
 
-		return ioutil.ReadAll(f)
+		content, err := ioutil.ReadAll(f)
+		if err != nil {
+			return nil, err
+		}
+
+		return &FileInfo{
+			Name:    fh.Filename,
+			Content: content,
+		}, nil
 	}, CodeBadRequest, cbs...)
-	return result.([]byte)
+	return result.(*FileInfo)
 }
 
 func EnvBool(c echo.Context, key string) (bool, error) {
