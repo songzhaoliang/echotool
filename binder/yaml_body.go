@@ -1,7 +1,7 @@
 package binder
 
 import (
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"gopkg.in/yaml.v2"
 )
 

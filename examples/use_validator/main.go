@@ -4,7 +4,7 @@ import (
 	"fmt"
 	rf "reflect"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/songzhaoliang/echotool"
 	evd "github.com/songzhaoliang/echotool/validator"
 	vd "gopkg.in/go-playground/validator.v8"

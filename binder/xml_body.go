@@ -3,7 +3,7 @@ package binder
 import (
 	"encoding/xml"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 var XMLBodyBinder = &xmlBodyBinder{}

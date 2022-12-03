@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/google/go-querystring/query"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/popeyeio/handy"
 	"github.com/songzhaoliang/echotool/json"
 )

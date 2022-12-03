@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/textproto"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/popeyeio/handy"
 )
 

@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 var ProtobufBodyBinder = &protobufBodyBinder{}

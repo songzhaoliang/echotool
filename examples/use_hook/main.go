@@ -3,10 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/songzhaoliang/echotool/binder"
-
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/songzhaoliang/echotool"
+	"github.com/songzhaoliang/echotool/binder"
 )
 
 const (

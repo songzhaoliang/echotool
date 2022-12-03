@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	evd "github.com/songzhaoliang/echotool/validator"
 	"github.com/stretchr/testify/assert"
 	vd "gopkg.in/go-playground/validator.v8"

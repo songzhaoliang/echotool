@@ -3,7 +3,7 @@ package binder
 import (
 	"net/url"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 var ParamBinder = &paramBinder{}
