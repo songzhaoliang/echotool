@@ -1,6 +1,8 @@
 package echotool
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -33,7 +35,11 @@ func RespError(id string, code int, err error) *CommonResponse {
 }
 
 func FinishWithCodeData(c echo.Context, code int, data interface{}) {
-	c.JSON(HTTPStatus(code), RespOK(GetRequestID(c), code, data))
+	status := HTTPStatus(code)
+	if status < http.StatusMultipleChoices || status > http.StatusPermanentRedirect {
+		c.JSON(status, RespOK(GetRequestID(c), code, data))
+	}
+	c.Redirect(status, data.(string))
 }
 
 func AbortWithCodeErr(c echo.Context, code int, err error) {

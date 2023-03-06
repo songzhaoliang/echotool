@@ -56,6 +56,10 @@ func (ec *Context) Finish(code int, data interface{}) {
 	ec.data = data
 }
 
+func (ec *Context) Redirect(code int, url string) {
+	ec.Finish(code, url)
+}
+
 func (ec *Context) Abort(code int, err error) {
 	ec.ok = false
 	ec.code = code
