@@ -38,8 +38,9 @@ func FinishWithCodeData(c echo.Context, code int, data interface{}) {
 	status := HTTPStatus(code)
 	if status < http.StatusMultipleChoices || status > http.StatusPermanentRedirect {
 		c.JSON(status, RespOK(GetRequestID(c), code, data))
+	} else {
+		c.Redirect(status, data.(string))
 	}
-	c.Redirect(status, data.(string))
 }
 
 func AbortWithCodeErr(c echo.Context, code int, err error) {
