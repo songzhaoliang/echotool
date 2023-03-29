@@ -2,6 +2,7 @@ package echotool
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/popeyeio/handy"
 	"moul.io/http2curl"
 )
@@ -59,4 +60,14 @@ func PrintRequest() HandlerFunc {
 			CtxInfoKV(ec, cmd.String())
 		}
 	}
+}
+
+func DefaultCORS() echo.MiddlewareFunc {
+	return middleware.CORS()
+}
+
+func UnsafeCORS() echo.MiddlewareFunc {
+	middleware.DefaultCORSConfig.AllowCredentials = true
+	middleware.DefaultCORSConfig.UnsafeWildcardOriginWithAllowCredentials = true
+	return DefaultCORS()
 }
