@@ -68,6 +68,7 @@ func DefaultCORS() echo.MiddlewareFunc {
 
 func UnsafeCORS() echo.MiddlewareFunc {
 	middleware.DefaultCORSConfig.AllowCredentials = true
-	middleware.DefaultCORSConfig.UnsafeWildcardOriginWithAllowCredentials = true
+	middleware.DefaultCORSConfig.UnsafeWildcardOriginWithAllowCredentials = true // send origin back
+	middleware.DefaultCORSConfig.MaxAge = 2592000                                // the result of preflight can be cached one month
 	return DefaultCORS()
 }
