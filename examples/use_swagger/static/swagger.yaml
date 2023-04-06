@@ -1,0 +1,60 @@
+basePath: /
+definitions:
+  main.CommonResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      request_id:
+        type: string
+    type: object
+  main.User:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+host: localhost:1323
+info:
+  contact:
+    email: 957687172@qq.com
+    name: songzhaoliang
+    url: https://github.com/songzhaoliang/echotool
+  description: This is a server for swagger example
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: xxx
+  title: Swagger Example
+  version: "1.0"
+paths:
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: create a user by id and name
+      parameters:
+      - description: user information
+        in: body
+        name: _
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.CommonResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.CommonResponse'
+      summary: create a user
+      tags:
+      - user
+swagger: "2.0"

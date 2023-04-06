@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/songzhaoliang/echotool/metric"
 	"github.com/songzhaoliang/echotool/pprof"
+	"github.com/songzhaoliang/echotool/swagger"
 )
 
 type HandlerFunc func(echo.Context, *Context)
@@ -57,6 +58,7 @@ func NewDefaultEcho() *echo.Echo {
 	r.Use(SetRequestID(GetUUID))
 	pprof.Register(r)
 	metric.Register(r)
+	swagger.Register(r)
 	return r
 }
 
