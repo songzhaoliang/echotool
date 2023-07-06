@@ -182,6 +182,25 @@ func CtxPanic(ec *Context, format string, args ...interface{}) {
 	buildLogger(ec).Panicf(format, args...)
 }
 
+func CtxPrint(ec *Context, level zapcore.Level, format string, args ...interface{}) {
+	switch level {
+	case zapcore.DebugLevel:
+		CtxDebug(ec, format, args...)
+	case zapcore.InfoLevel:
+		CtxInfo(ec, format, args...)
+	case zapcore.WarnLevel:
+		CtxWarn(ec, format, args...)
+	case zapcore.ErrorLevel:
+		CtxError(ec, format, args...)
+	case zapcore.FatalLevel:
+		CtxFatal(ec, format, args...)
+	case zapcore.PanicLevel:
+		CtxPanic(ec, format, args...)
+	default:
+		CtxDebug(ec, format, args...)
+	}
+}
+
 func CtxDebugKV(ec *Context, msg string, fields ...zap.Field) {
 	buildLogger(ec).Desugar().Debug(msg, fields...)
 }
@@ -206,6 +225,25 @@ func CtxFatalKV(ec *Context, msg string, fields ...zap.Field) {
 // CtxPanicKV logs a message, then panics.
 func CtxPanicKV(ec *Context, msg string, fields ...zap.Field) {
 	buildLogger(ec).Desugar().Panic(msg, fields...)
+}
+
+func CtxPrintKV(ec *Context, level zapcore.Level, msg string, fields ...zap.Field) {
+	switch level {
+	case zapcore.DebugLevel:
+		CtxDebugKV(ec, msg, fields...)
+	case zapcore.InfoLevel:
+		CtxInfoKV(ec, msg, fields...)
+	case zapcore.WarnLevel:
+		CtxWarnKV(ec, msg, fields...)
+	case zapcore.ErrorLevel:
+		CtxErrorKV(ec, msg, fields...)
+	case zapcore.FatalLevel:
+		CtxFatalKV(ec, msg, fields...)
+	case zapcore.PanicLevel:
+		CtxPanicKV(ec, msg, fields...)
+	default:
+		CtxDebugKV(ec, msg, fields...)
+	}
 }
 
 func buildLogger(ec *Context) (l *zap.SugaredLogger) {
@@ -250,6 +288,25 @@ func Panic(format string, args ...interface{}) {
 	logger.Panicf(format, args...)
 }
 
+func Print(level zapcore.Level, format string, args ...interface{}) {
+	switch level {
+	case zapcore.DebugLevel:
+		Debug(format, args...)
+	case zapcore.InfoLevel:
+		Info(format, args...)
+	case zapcore.WarnLevel:
+		Warn(format, args...)
+	case zapcore.ErrorLevel:
+		Error(format, args...)
+	case zapcore.FatalLevel:
+		Fatal(format, args...)
+	case zapcore.PanicLevel:
+		Panic(format, args...)
+	default:
+		Debug(format, args...)
+	}
+}
+
 func DebugKV(msg string, fields ...zap.Field) {
 	logger.Desugar().Debug(msg, fields...)
 }
@@ -274,4 +331,23 @@ func FatalKV(msg string, fields ...zap.Field) {
 // PanicKV logs a message, then panics.
 func PanicKV(msg string, fields ...zap.Field) {
 	logger.Desugar().Panic(msg, fields...)
+}
+
+func PrintKV(level zapcore.Level, msg string, fields ...zap.Field) {
+	switch level {
+	case zapcore.DebugLevel:
+		DebugKV(msg, fields...)
+	case zapcore.InfoLevel:
+		InfoKV(msg, fields...)
+	case zapcore.WarnLevel:
+		WarnKV(msg, fields...)
+	case zapcore.ErrorLevel:
+		ErrorKV(msg, fields...)
+	case zapcore.FatalLevel:
+		FatalKV(msg, fields...)
+	case zapcore.PanicLevel:
+		PanicKV(msg, fields...)
+	default:
+		DebugKV(msg, fields...)
+	}
 }
