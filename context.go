@@ -111,6 +111,13 @@ func (ec *Context) GetStartTime() time.Time {
 	return ec.startTime
 }
 
+func (ec *Context) Clone() *Context {
+	return &Context{
+		namedValue:   ec.namedValue,
+		customValues: ec.customValues,
+	}
+}
+
 func (ec *Context) reset() {
 	ec.engine = nil
 	ec.handlers = ec.handlers[:0]
