@@ -3,6 +3,7 @@ package echotool
 import (
 	"io"
 	"os"
+	"runtime"
 	"time"
 
 	rl "github.com/lestrrat-go/file-rotatelogs"
@@ -148,6 +149,15 @@ func FasterJSONReflectedEncoder(w io.Writer) zapcore.ReflectedEncoder {
 func SetLogger(l *zap.SugaredLogger) {
 	if l != nil {
 		logger = l
+	}
+}
+
+func SetLoggerWithFinalizer(l *zap.SugaredLogger) {
+	if l != nil {
+		logger = l
+		runtime.SetFinalizer(l, func(l *zap.SugaredLogger) {
+			_ = l.Sync()
+		})
 	}
 }
 
