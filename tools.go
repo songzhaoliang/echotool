@@ -14,6 +14,7 @@ import (
 	"github.com/google/go-querystring/query"
 	"github.com/labstack/echo/v4"
 	"github.com/popeyeio/handy"
+	"github.com/rs/xid"
 	"github.com/songzhaoliang/echotool/json"
 )
 
@@ -563,6 +564,10 @@ func GetRequestHost(req *http.Request) (host string) {
 func GetUUID(c echo.Context) (u string) {
 	u, _ = handy.GetUUID()
 	return
+}
+
+func GetShortUUID(c echo.Context) string {
+	return xid.New().String()
 }
 
 func GetHostname() (host string) {

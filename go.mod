@@ -15,6 +15,7 @@ require (
 	github.com/popeyeio/handy v1.0.0
 	github.com/prometheus/client_golang v1.19.1
 	github.com/redis/go-redis/v9 v9.5.1
+	github.com/rs/xid v1.5.0
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.3
