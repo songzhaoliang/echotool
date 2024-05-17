@@ -411,6 +411,86 @@ func MustEnvString(c echo.Context, key string, cbs ...CallbackFunc) string {
 	return result.(string)
 }
 
+func CookieBool(c echo.Context, key string) (bool, error) {
+	cookie, err := c.Cookie(key)
+	if err != nil {
+		return false, err
+	}
+
+	if v := cookie.Value; handy.IsEmptyStr(v) {
+		return false, NewCookieEmptyError(key)
+	} else {
+		return strconv.ParseBool(v)
+	}
+}
+
+func MustCookieBool(c echo.Context, key string, cbs ...CallbackFunc) bool {
+	result := MustDoCallback(func() (interface{}, error) {
+		return CookieBool(c, key)
+	}, CodeInternalErr, cbs...)
+	return result.(bool)
+}
+
+func CookieInt64(c echo.Context, key string) (int64, error) {
+	cookie, err := c.Cookie(key)
+	if err != nil {
+		return 0, err
+	}
+
+	if v := cookie.Value; handy.IsEmptyStr(v) {
+		return 0, NewCookieEmptyError(key)
+	} else {
+		return strconv.ParseInt(v, 10, 64)
+	}
+}
+
+func MustCookieInt64(c echo.Context, key string, cbs ...CallbackFunc) int64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return CookieInt64(c, key)
+	}, CodeInternalErr, cbs...)
+	return result.(int64)
+}
+
+func CookieUint64(c echo.Context, key string) (uint64, error) {
+	cookie, err := c.Cookie(key)
+	if err != nil {
+		return 0, err
+	}
+
+	if v := cookie.Value; handy.IsEmptyStr(v) {
+		return 0, NewCookieEmptyError(key)
+	} else {
+		return strconv.ParseUint(v, 10, 64)
+	}
+}
+
+func MustCookieUint64(c echo.Context, key string, cbs ...CallbackFunc) uint64 {
+	result := MustDoCallback(func() (interface{}, error) {
+		return CookieUint64(c, key)
+	}, CodeInternalErr, cbs...)
+	return result.(uint64)
+}
+
+func CookieString(c echo.Context, key string) (string, error) {
+	cookie, err := c.Cookie(key)
+	if err != nil {
+		return handy.StrEmpty, err
+	}
+
+	if v := cookie.Value; handy.IsEmptyStr(v) {
+		return handy.StrEmpty, NewEnvEmptyError(key)
+	} else {
+		return v, nil
+	}
+}
+
+func MustCookieString(c echo.Context, key string, cbs ...CallbackFunc) string {
+	result := MustDoCallback(func() (interface{}, error) {
+		return CookieString(c, key)
+	}, CodeInternalErr, cbs...)
+	return result.(string)
+}
+
 // EncodeValues needs tag "url" in fields of v.
 func EncodeValues(v interface{}) (url.Values, error) {
 	return query.Values(v)

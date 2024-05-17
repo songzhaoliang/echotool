@@ -20,6 +20,7 @@ const (
 	TagMsgpack  = "msgpack"
 	TagYAML     = "yaml"
 	TagEnv      = "env"
+	TagCookie   = "cookie"
 )
 
 var (

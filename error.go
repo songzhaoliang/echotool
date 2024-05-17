@@ -14,6 +14,7 @@ const (
 	KindPostForm
 	KindForm
 	KindEnv
+	KindCookie
 )
 
 var _ fmt.Stringer = (*Kind)(nil)
@@ -32,6 +33,8 @@ func (k Kind) String() string {
 		return "form"
 	case KindEnv:
 		return "env"
+	case KindCookie:
+		return "cookie"
 	}
 	return fmt.Sprintf("unknown kind: %d", k)
 }
@@ -72,6 +75,10 @@ func NewFormEmptyError(key string) *EmptyError {
 
 func NewEnvEmptyError(key string) *EmptyError {
 	return NewEmptyError(KindEnv, key)
+}
+
+func NewCookieEmptyError(key string) *EmptyError {
+	return NewEmptyError(KindCookie, key)
 }
 
 func (e EmptyError) Error() string {

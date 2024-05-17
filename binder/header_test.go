@@ -10,8 +10,8 @@ import (
 )
 
 type User struct {
-	ID   int    `header:"X-Id" param:"id" form:"id" json:"id" xml:"id" msgpack:"id" yaml:"id" env:"ID"`
-	Name string `header:"X-Name" param:"name" form:"name" json:"name" xml:"name"  msgpack:"name" yaml:"name" env:"NAME"`
+	ID   int    `header:"X-Id" param:"id" form:"id" json:"id" xml:"id" msgpack:"id" yaml:"id" env:"ID" cookie:"-"`
+	Name string `header:"X-Name" param:"name" form:"name" json:"name" xml:"name"  msgpack:"name" yaml:"name" env:"NAME" cookie:"name"`
 }
 
 func TestHeaderBinder(t *testing.T) {
