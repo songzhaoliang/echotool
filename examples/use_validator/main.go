@@ -11,8 +11,15 @@ import (
 )
 
 type User struct {
-	ID   int    `json:"id" valid:"userid"`
-	Name string `json:"name" valid:"required"`
+	ID      int       `json:"id" valid:"userid"`
+	Name    string    `json:"name" valid:"required"`
+	Gender  string    `json:"gender" valid:"gender|len=0"`
+	Courses []*Course `json:"courses" valid:"gte=0,dive"`
+}
+
+type Course struct {
+	Name  string `json:"name" valid:"required"`
+	Score int    `json:"score" valid:"min=0,max=100"`
 }
 
 func main() {
@@ -41,6 +48,7 @@ func CreateUser(c echo.Context, ec *echotool.Context) {
 func InitValidators() {
 	validatorFuncs := map[string]vd.Func{
 		"userid": IsValidUserID,
+		"gender": IsValidGender,
 	}
 
 	for k, f := range validatorFuncs {
@@ -57,4 +65,15 @@ func IsValidUserID(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ str
 		return false
 	}
 	return true
+}
+
+func IsValidGender(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
+	gender := v.String()
+
+	switch gender {
+	case "male", "female":
+		return true
+	default:
+		return false
+	}
 }
