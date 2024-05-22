@@ -4,14 +4,14 @@ import (
 	"reflect"
 	"sync"
 
-	"gopkg.in/go-playground/validator.v8"
+	vd "github.com/go-playground/validator/v10"
 )
 
 var EchotoolValidator = &echotoolValidator{}
 
 type echotoolValidator struct {
 	once     sync.Once
-	validate *validator.Validate
+	validate *vd.Validate
 }
 
 var _ Validator = (*echotoolValidator)(nil)
@@ -24,32 +24,30 @@ func (v *echotoolValidator) ValidateStruct(obj interface{}) error {
 	return nil
 }
 
-func (v *echotoolValidator) RegisterValidation(key string, fn validator.Func) error {
+func (v *echotoolValidator) RegisterValidation(key string, fn vd.Func) error {
 	v.lazyInit()
 	return v.validate.RegisterValidation(key, fn)
 }
 
-func (v *echotoolValidator) RegisterAliasValidation(alias, tags string) {
+func (v *echotoolValidator) RegisterAlias(alias, tags string) {
 	v.lazyInit()
-	v.validate.RegisterAliasValidation(alias, tags)
+	v.validate.RegisterAlias(alias, tags)
 }
 
-func (v *echotoolValidator) RegisterStructValidation(fn validator.StructLevelFunc, types ...interface{}) {
+func (v *echotoolValidator) RegisterStructValidation(fn vd.StructLevelFunc, types ...interface{}) {
 	v.lazyInit()
 	v.validate.RegisterStructValidation(fn, types...)
 }
 
-func (v *echotoolValidator) RegisterCustomTypeFunc(fn validator.CustomTypeFunc, types ...interface{}) {
+func (v *echotoolValidator) RegisterCustomTypeFunc(fn vd.CustomTypeFunc, types ...interface{}) {
 	v.lazyInit()
 	v.validate.RegisterCustomTypeFunc(fn, types...)
 }
 
 func (v *echotoolValidator) lazyInit() {
 	v.once.Do(func() {
-		config := &validator.Config{
-			TagName: TagValid,
-		}
-		v.validate = validator.New(config)
+		v.validate = vd.New()
+		v.validate.SetTagName(TagValid)
 	})
 }
 

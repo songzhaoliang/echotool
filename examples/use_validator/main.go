@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	rf "reflect"
 
+	vd "github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/songzhaoliang/echotool"
 	evd "github.com/songzhaoliang/echotool/validator"
-	vd "gopkg.in/go-playground/validator.v8"
 )
 
 type User struct {
@@ -46,20 +45,20 @@ func CreateUser(c echo.Context, ec *echotool.Context) {
 }
 
 func InitValidators() {
-	validatorFuncs := map[string]vd.Func{
+	fs := map[string]vd.Func{
 		"userid": IsValidUserID,
 		"gender": IsValidGender,
 	}
 
-	for k, f := range validatorFuncs {
+	for k, f := range fs {
 		if err := evd.EchotoolValidator.RegisterValidation(k, f); err != nil {
 			panic(err)
 		}
 	}
 }
 
-func IsValidUserID(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
-	id := v.Int()
+func IsValidUserID(l vd.FieldLevel) bool {
+	id := l.Field().Int()
 
 	if id <= 0 {
 		return false
@@ -67,8 +66,8 @@ func IsValidUserID(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ str
 	return true
 }
 
-func IsValidGender(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
-	gender := v.String()
+func IsValidGender(l vd.FieldLevel) bool {
+	gender := l.Field().String()
 
 	switch gender {
 	case "male", "female":

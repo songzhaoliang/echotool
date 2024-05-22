@@ -3,14 +3,13 @@ package echotool
 import (
 	"net/http"
 	"net/http/httptest"
-	rf "reflect"
 	"strings"
 	"testing"
 
+	vd "github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	evd "github.com/songzhaoliang/echotool/validator"
 	"github.com/stretchr/testify/assert"
-	vd "gopkg.in/go-playground/validator.v8"
 )
 
 const defaultUserID = 100
@@ -49,12 +48,12 @@ func TestBind_SecondMethod(t *testing.T) {
 }
 
 func Preprocess(t *testing.T) (echo.Context, *User) {
-	validatorFuncs := map[string]vd.Func{
+	fs := map[string]vd.Func{
 		"userid":   IsValidUserID,
 		"username": IsValidUserName,
 	}
 
-	for k, f := range validatorFuncs {
+	for k, f := range fs {
 		if err := evd.EchotoolValidator.RegisterValidation(k, f); err != nil {
 			assert.NoError(t, err)
 		}
@@ -78,8 +77,8 @@ func Postprocess(t *testing.T, u *User, err error) {
 	assert.Equal(t, "li si", u.FullName)
 }
 
-func IsValidUserID(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
-	id := v.Int()
+func IsValidUserID(l vd.FieldLevel) bool {
+	id := l.Field().Int()
 
 	if id <= 0 {
 		return false
@@ -87,8 +86,8 @@ func IsValidUserID(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ str
 	return true
 }
 
-func IsValidUserName(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
-	name := v.String()
+func IsValidUserName(l vd.FieldLevel) bool {
+	name := l.Field().String()
 
 	length := len(name)
 	if length < 2 || length > 50 {

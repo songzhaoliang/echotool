@@ -1,11 +1,10 @@
 package validator
 
 import (
-	rf "reflect"
 	"testing"
 
+	vd "github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
-	vd "gopkg.in/go-playground/validator.v8"
 )
 
 type User struct {
@@ -14,12 +13,12 @@ type User struct {
 }
 
 func TestEchotoolValidator(t *testing.T) {
-	validatorFuncs := map[string]vd.Func{
+	fs := map[string]vd.Func{
 		"userid":   IsValidUserID,
-		"username": IsValidUserName,
+		"username": IsValidUsername,
 	}
 
-	for k, f := range validatorFuncs {
+	for k, f := range fs {
 		if err := EchotoolValidator.RegisterValidation(k, f); err != nil {
 			assert.NoError(t, err)
 		}
@@ -29,8 +28,8 @@ func TestEchotoolValidator(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func IsValidUserID(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
-	id := v.Int()
+func IsValidUserID(l vd.FieldLevel) bool {
+	id := l.Field().Int()
 
 	if id <= 0 {
 		return false
@@ -38,8 +37,8 @@ func IsValidUserID(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ str
 	return true
 }
 
-func IsValidUserName(_ *vd.Validate, _, _, v rf.Value, _ rf.Type, _ rf.Kind, _ string) bool {
-	name := v.String()
+func IsValidUsername(l vd.FieldLevel) bool {
+	name := l.Field().String()
 
 	length := len(name)
 	if length < 2 || length > 50 {
